@@ -1,0 +1,17 @@
+# --- SECRETE FIREBASE ---
+*.json
+*firebase*.json
+google-services.json
+firebase-service-account.json
+
+# --- SECRETE BACKEND ---
+application.yml
+application.properties
+
+# --- FOLDERE GENERATE AUTOMAT ---
+frontend/build/
+frontend/.gradle/
+backend/target/
+.idea/
+*.iml
+local.properties
