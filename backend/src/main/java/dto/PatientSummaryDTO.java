@@ -1,11 +1,13 @@
 package dto;
 
+import com.fmi_unitbv2026.demo.enums.Status;
+
 import java.util.List;
 
 public class PatientSummaryDTO {
     private int aiScore;
     private String aiNote;
-    private Enum status;
+    private Status status;
     private List<QuestionResponseDTO> questions;
 
 
@@ -31,10 +33,10 @@ public class PatientSummaryDTO {
         this.aiNote = aiNote;
     }
 
-    public Enum getStatus() {
+    public Status getStatus() {
         return status;
     }
-    public void setStatus(Enum status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -44,4 +46,6 @@ public class PatientSummaryDTO {
     public void setQuestions(List<QuestionResponseDTO> questions) {
         this.questions = questions;
     }
+
+
 }

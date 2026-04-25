@@ -1,9 +1,11 @@
 package dto;
 
+import com.fmi_unitbv2026.demo.enums.Status;
+
 public class QuestionResponseDTO {
     private String questionText;
     private String answerText;
-    private Enum responseType;
+    private Status responseType;
 
     public QuestionResponseDTO(String questionText, String answerText, Enum responseType) {
         this.questionText = questionText;
@@ -19,10 +21,10 @@ public class QuestionResponseDTO {
         this.questionText = questionText;
     }
 
-    public Enum getResponseType() {
+    public Status getResponseType() {
         return responseType;
     }
-    public void setResponseType(Enum responseType) {
+    public void setResponseType(Status responseType) {
         this.responseType = responseType;
     }
 
