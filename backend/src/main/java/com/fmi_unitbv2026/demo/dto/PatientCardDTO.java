@@ -1,14 +1,16 @@
-package dto;
+package com.fmi_unitbv2026.demo.dto;
+
+import com.fmi_unitbv2026.demo.enums.Status;
 
 public class PatientCardDTO {
     private String idPatient;
     private String firstName;
     private String lastName;
     private String surgeryType;
-    private String status;
+    private Status status;
 
 
-    public PatientCardDTO(String idPatient, String firstName, String lastName, String surgeryType, String status) {
+    public PatientCardDTO(String idPatient, String firstName, String lastName, String surgeryType, Status status) {
         this.idPatient = idPatient;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -37,10 +39,10 @@ public class PatientCardDTO {
         this.firstName = firstName;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

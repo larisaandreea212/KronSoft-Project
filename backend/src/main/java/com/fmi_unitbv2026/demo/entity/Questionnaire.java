@@ -24,4 +24,21 @@ public class Questionnaire {
 
     @Column(name = "is_inverted")
     private boolean isInverted;
+
+    public Questionnaire() { }
+
+    public boolean isInverted() { return isInverted; }
+    public void setInverted(boolean inverted) { isInverted = inverted; }
+
+    public double getWeight() { return weight; }
+    public void setWeight(double weight) { this.weight = weight; }
+
+    public ResponseType getResponseType() { return responseType; }
+    public void setResponseType(ResponseType responseType) { this.responseType = responseType; }
+
+    public String getQuestionText() { return questionText; }
+    public void setQuestionText(String questionText) { this.questionText = questionText; }
+
+    public int getIdQuestion() { return idQuestion; }
+    public void setIdQuestion(int idQuestion) { this.idQuestion = idQuestion; }
 }

@@ -21,4 +21,18 @@ public class PatientResponse {
 
     @Column(name = "answer_text")
     private String answerText;
+
+    public PatientResponse() { }
+
+    public int getIdResponse() { return idResponse; }
+    public void setIdResponse(int idResponse) { this.idResponse = idResponse; }
+
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+
+    public Questionnaire getQuestion() { return question; }
+    public void setQuestion(Questionnaire question) { this.question = question; }
+
+    public String getAnswerText() { return answerText; }
+    public void setAnswerText(String answerText) { this.answerText = answerText; }
 }

@@ -1,4 +1,4 @@
-package dto;
+package com.fmi_unitbv2026.demo.dto;
 
 public class DoctorDTO {
     private String idDoctor;

@@ -1,13 +1,13 @@
-package dto;
+package com.fmi_unitbv2026.demo.dto;
 
-import com.fmi_unitbv2026.demo.enums.Status;
+import com.fmi_unitbv2026.demo.enums.ResponseType;
 
 public class QuestionResponseDTO {
     private String questionText;
     private String answerText;
-    private Status responseType;
+    private ResponseType responseType;
 
-    public QuestionResponseDTO(String questionText, String answerText, Enum responseType) {
+    public QuestionResponseDTO(String questionText, String answerText, ResponseType responseType) {
         this.questionText = questionText;
         this.answerText = answerText;
         this.responseType = responseType;
@@ -21,10 +21,10 @@ public class QuestionResponseDTO {
         this.questionText = questionText;
     }
 
-    public Status getResponseType() {
+    public ResponseType getResponseType() {
         return responseType;
     }
-    public void setResponseType(Status responseType) {
+    public void setResponseType(ResponseType responseType) {
         this.responseType = responseType;
     }
 
