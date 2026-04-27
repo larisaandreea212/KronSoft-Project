@@ -1,4 +1,4 @@
-package dto;
+package com.fmi_unitbv2026.demo.dto;
 
 import com.fmi_unitbv2026.demo.enums.Status;
 
@@ -11,7 +11,7 @@ public class PatientSummaryDTO {
     private List<QuestionResponseDTO> questions;
 
 
-    public PatientSummaryDTO(int aiScore, List<QuestionResponseDTO> questionResponses, Enum status, String aiNote) {
+    public PatientSummaryDTO(int aiScore, List<QuestionResponseDTO> questionResponses, Status status, String aiNote) {
         this.aiScore = aiScore;
         this.questions = questionResponses;
         this.status = status;
