@@ -1,6 +1,8 @@
 package com.fmi_unitbv2026.demo.repository;
 
 import com.fmi_unitbv2026.demo.entity.AIReport;
+import com.fmi_unitbv2026.demo.entity.Patient;
+import com.fmi_unitbv2026.demo.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,13 +1,13 @@
 package com.fmi_unitbv2026.demo.dto;
 
 public class DoctorDTO {
-    private String idDoctor;
+    private int idDoctor;
     private String firstName;
     private String lastName;
     private String specialization;
     private String hospitalName;
 
-    public DoctorDTO(String idDoctor, String firstName, String lastName, String specialization, String hospitalName) {
+    public DoctorDTO(int idDoctor, String firstName, String lastName, String specialization, String hospitalName) {
         this.idDoctor = idDoctor;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -16,10 +16,10 @@ public class DoctorDTO {
     }
 
 
-    public String getIdDoctor() {
+    public int getIdDoctor() {
         return idDoctor;
     }
-    public void setIdDoctor(String idDoctor) {
+    public void setIdDoctor(int idDoctor) {
         this.idDoctor = idDoctor;
     }
 
