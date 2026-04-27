@@ -22,4 +22,21 @@ public class Doctor {
 
     @Column(name = "hospital_name")
     private String hospitalName;
+
+    public Doctor() { }
+
+    public int getIdDoctor() { return idDoctor; }
+    public void setIdDoctor(int idDoctor) { this.idDoctor = idDoctor; }
+
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
+
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
 }
