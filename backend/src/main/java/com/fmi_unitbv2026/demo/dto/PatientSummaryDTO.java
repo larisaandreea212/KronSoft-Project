@@ -10,6 +10,7 @@ public class PatientSummaryDTO {
     private Status status;
     private List<QuestionResponseDTO> questions;
 
+    public PatientSummaryDTO() {}
 
     public PatientSummaryDTO(int aiScore, List<QuestionResponseDTO> questionResponses, Status status, String aiNote) {
         this.aiScore = aiScore;

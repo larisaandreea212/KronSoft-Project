@@ -9,6 +9,7 @@ public class PatientCardDTO {
     private String surgeryType;
     private Status status;
 
+    public PatientCardDTO() {}
 
     public PatientCardDTO(String idPatient, String firstName, String lastName, String surgeryType, Status status) {
         this.idPatient = idPatient;

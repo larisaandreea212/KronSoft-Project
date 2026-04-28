@@ -7,6 +7,7 @@ public class QuestionResponseDTO {
     private String answerText;
     private ResponseType responseType;
 
+    public QuestionResponseDTO() {}
     public QuestionResponseDTO(String questionText, String answerText, ResponseType responseType) {
         this.questionText = questionText;
         this.answerText = answerText;

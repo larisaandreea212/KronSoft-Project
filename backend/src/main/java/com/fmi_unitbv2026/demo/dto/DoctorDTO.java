@@ -7,6 +7,8 @@ public class DoctorDTO {
     private String specialization;
     private String hospitalName;
 
+    public DoctorDTO() {}
+
     public DoctorDTO(int idDoctor, String firstName, String lastName, String specialization, String hospitalName) {
         this.idDoctor = idDoctor;
         this.firstName = firstName;

@@ -6,6 +6,8 @@ public class EvolutionDTO {
     private LocalDate date;
     private int aiScore;
 
+    public EvolutionDTO() {}
+
     public EvolutionDTO(LocalDate date, int aiScore) {
         this.date = date;
         this.aiScore = aiScore;

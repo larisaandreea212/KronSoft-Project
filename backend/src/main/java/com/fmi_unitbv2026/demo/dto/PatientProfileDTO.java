@@ -9,6 +9,8 @@ public class PatientProfileDTO {
     private int age;
     private LocalDate surgeryDate;
 
+    public PatientProfileDTO() {}
+
     public PatientProfileDTO(int idPatient, LocalDate surgeryDate, int age, String sex, String cnp) {
         this.idPatient = idPatient;
         this.surgeryDate = surgeryDate;
