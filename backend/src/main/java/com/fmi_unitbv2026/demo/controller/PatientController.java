@@ -1,10 +1,13 @@
 // File: src/main/java/com/fmi_unitbv2026/demo/controller/PatientController.java
 package com.fmi_unitbv2026.demo.controller;
 
+import com.fmi_unitbv2026.demo.dto.PatientCardDTO;
+import com.fmi_unitbv2026.demo.dto.PatientProfileDTO;
 import com.fmi_unitbv2026.demo.dto.PatientSummaryDTO;
 import com.fmi_unitbv2026.demo.dto.QuestionResponseDTO;
 import com.fmi_unitbv2026.demo.enums.ResponseType;
 import com.fmi_unitbv2026.demo.enums.Status;
+import com.fmi_unitbv2026.demo.services.PatientService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/patient")
-@CrossOrigin(origins = "*") // dev only; tighten later
 public class PatientController {
+
+    private final PatientService patientService;
+
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
 
     @GetMapping("/summary")
     public ResponseEntity<PatientSummaryDTO> getSummary() {
@@ -30,4 +38,34 @@ public class PatientController {
 
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/all/{idDoctor}")
+    public ResponseEntity<List<PatientCardDTO>> getAllPatientsForDoctor(@PathVariable int idDoctor)
+    {
+        List<PatientCardDTO> listPatientsDTO = patientService.getPatientsForDoctor(idDoctor);
+        return ResponseEntity.ok(listPatientsDTO);
+    }
+
+    @GetMapping("/critical/{idDoctor}")
+    public ResponseEntity<List<PatientCardDTO>> getCriticalPatientsForDoctor(@PathVariable int idDoctor)
+    {
+        List<PatientCardDTO> listCriticalPatientsDTO = patientService.getCriticalPatientsForDoctor(idDoctor);
+        return ResponseEntity.ok(listCriticalPatientsDTO);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PatientCardDTO>> searchPatients( @RequestParam int idDoctor, @RequestParam String name)
+    {
+        List<PatientCardDTO> patientCards = patientService.searchPatientsByName(idDoctor, name);
+        return ResponseEntity.ok(patientCards);
+    }
+
+    //aici am modificat sa primeasca IDPatient, nu IdDoctor deoarece metoda din servide primeste IdPatient
+    @GetMapping("/profile/{idPatient}")
+    public ResponseEntity<PatientProfileDTO> getPatientProfile(@PathVariable int idPatient)
+    {
+        PatientProfileDTO patientProfileDTO = patientService.getPatientProfile(idPatient);
+        return ResponseEntity.ok(patientProfileDTO);
+    }
+
 }
