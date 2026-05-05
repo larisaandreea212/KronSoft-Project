@@ -23,27 +23,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.components.*
+import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.DoctorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainDoctorView() {
-    val currentDoctor = Doctor(1L, "Maria", "Ionescu", "Senior Cardiologist", "County Emergency Hospital")
+fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val doctorInfo by viewModel.doctorInfo
+    val patientsList by viewModel.patientsList
+    val profile by viewModel.patientData
+    val summary by viewModel.patientSummary
+    val evolutions by viewModel.evolutionData
+    val isLoading by viewModel.isLoading
+    val errorMessage by viewModel.errorMessage
+
     var selectedTab by remember { mutableStateOf("all") }
     var searchQuery by remember { mutableStateOf("") }
-    var selectedPatientId by remember { mutableStateOf<Long?>(null) }
+    var selectedPatientId by remember { mutableStateOf<String?>(null) }
 
-    val patientsList = remember {
-        listOf(
-            PatientCard(1, "John", "Doe", "Heart Bypass", PatientStatus.CRITICAL),
-            PatientCard(2, "Alice", "Smith", "Hip Replacement", PatientStatus.MODERATE),
-            PatientCard(3, "Robert", "Brown", "Appendectomy", PatientStatus.STABLE),
-            PatientCard(4, "Elena", "Vasile", "Valve Replacement", PatientStatus.CRITICAL),
-            PatientCard(5, "George", "Popa", "Knee Arthroscopy", PatientStatus.STABLE)
-        )
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFF00E5FF))
+        }
+        return
+    }
+
+    if (errorMessage != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = errorMessage!!, color = Color.Red)
+        }
     }
 
     Row(modifier = Modifier.fillMaxSize()) {
-        DoctorSidebar(doctor = currentDoctor, selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+        doctorInfo?.let { doctor ->
+            DoctorSidebar(
+                doctor = doctor,
+                selectedTab = selectedTab,
+                onTabSelected = { tab ->
+                    selectedTab = tab
+                    if (tab == "critical") {
+                        viewModel.loadCriticalPatients(1)
+                    } else {
+                        viewModel.loadDoctorDashboard(1)
+                    }
+                }
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -63,7 +87,10 @@ fun MainDoctorView() {
 
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = {
+                    searchQuery = it
+                    viewModel.searchPatients( 1, it)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Search...", color = Color.Gray, fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
@@ -88,11 +115,16 @@ fun MainDoctorView() {
                     patientsList
                 }
 
-                items(filteredList) { patient ->
+                items(patientsList) { patient ->
                     PatientCardComponent(
                         patient = patient,
                         isSelected = selectedPatientId == patient.idPatient,
-                        onClick = { selectedPatientId = patient.idPatient }
+                        onClick = {
+                            selectedPatientId = patient.idPatient
+
+                            val idAsInt = patient.idPatient.toIntOrNull() ?: 0
+                            viewModel.selectPatient(idAsInt)
+                        }
                     )
                 }
             }
@@ -105,66 +137,56 @@ fun MainDoctorView() {
                 .background(Color.White)
         ) {
             if (selectedPatientId != null) {
-                val profile = PatientProfile(selectedPatientId!!.toInt(), "1920815400012", 68, "Male", "2026-04-10")
-                val summary = PatientSummary(
-                    aiScore = 85,
-                    aiNote = "Patient exhibits persistent hypertension and reported localized pain. The AI detected a 15% deviation in recovery speed compared to standard parameters. Immediate checkup recommended.",
-                    status = PatientStatus.CRITICAL,
-                    questions = listOf(
-                        QuestionResponse("Do you feel any sharp pain?", "Yes", ResponseType.YES_NO),
-                        QuestionResponse("Mobility level (1-5)", "2", ResponseType.SCALE_1_5),
-                        QuestionResponse("Sleep quality", "3", ResponseType.SCALE_1_5)
-                    )
-                )
-                val evolutions = listOf(
-                    Evolution("01 May", 20), Evolution("05 May", 45),
-                    Evolution("10 May", 70), Evolution("15 May", 85)
-                )
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(32.dp)
-                ) {
-                    Text(
-                        text = "Patient Profile: ${profile.CNP}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                        DetailItem("Age", "${profile.age}")
-                        DetailItem("Sex", profile.sex)
-                        DetailItem("Surgery Date", profile.surgeryDate)
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF001F3F)),
-                        shape = RoundedCornerShape(16.dp)
+                if (profile != null && summary != null) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(32.dp)
                     ) {
-                        Column(modifier = Modifier.padding(24.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("AI ANALYSIS", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                Spacer(modifier = Modifier.weight(1f))
-                                Text("Risk Score: ${summary.aiScore}%", color = Color.White, fontWeight = FontWeight.Bold)
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(summary.aiNote, color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, lineHeight = 22.sp)
+                        Text(
+                            text = "Patient Profile: ${profile!!.CNP}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                            DetailItem("Age", "${profile!!.age}")
+                            DetailItem("Sex", profile!!.sex)
+                            DetailItem("Surgery Date", profile!!.surgeryDate)
                         }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF001F3F)),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("AI ANALYSIS", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text("Risk Score: ${summary!!.aiScore}%", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(summary!!.aiNote, color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, lineHeight = 22.sp)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        EvolutionChartComponent(data = evolutions)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        QuestionnaireComponent(responses = summary!!.questions)
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    EvolutionChartComponent(data = evolutions)
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    QuestionnaireComponent(responses = summary.questions)
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF00E5FF))
+                    }
                 }
             } else {
                 Column(

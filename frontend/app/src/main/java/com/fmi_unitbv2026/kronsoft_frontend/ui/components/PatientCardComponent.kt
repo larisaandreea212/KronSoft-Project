@@ -84,17 +84,17 @@ fun PatientCardPreview() {
     Column(modifier = Modifier.padding(10.dp)) {
 
         PatientCardComponent(
-            patient = PatientCard(1, "Ion", "Popescu", "Cardiologie", PatientStatus.CRITICAL),
+            patient = PatientCard("1", "Ion", "Popescu", "Cardiologie", PatientStatus.CRITICAL),
             isSelected = false
         )
 
         PatientCardComponent(
-            patient = PatientCard(2, "Vasile", "Georgescu", "Ortopedie", PatientStatus.MODERATE),
+            patient = PatientCard("2", "Vasile", "Georgescu", "Ortopedie", PatientStatus.MODERATE),
             isSelected=false
         )
 
         PatientCardComponent(
-            patient = PatientCard(2, "Maria", "Ionescu", "Neurochirurgie", PatientStatus.STABLE),
+            patient = PatientCard("2", "Maria", "Ionescu", "Neurochirurgie", PatientStatus.STABLE),
             isSelected = true
         )
     }

@@ -3,7 +3,7 @@ import com.google.gson.annotations.SerializedName
 
 data class PatientCard (
     @SerializedName("idPatient")
-    val idPatient: Long,
+    val idPatient: String,
 
     @SerializedName("firstName")
     val firstName: String,
