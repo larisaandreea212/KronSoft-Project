@@ -5,7 +5,7 @@ data class PatientProfile (
     @SerializedName("idPacient")
     val idPacient: Int,
 
-    @SerializedName("CNP")
+    @SerializedName("cnp")
     val CNP: String,
 
     @SerializedName("age")

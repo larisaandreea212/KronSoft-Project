@@ -21,14 +21,14 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @GetMapping("/evolution/{IdPatient}")
+    @GetMapping("/evolution/{idPatient}")
     public ResponseEntity<List<EvolutionDTO>> getEvolution(@PathVariable int idPatient)
     {
         List<EvolutionDTO> evolution = reportService.getPatientEvolution(idPatient);
         return ResponseEntity.ok(evolution);
     }
 
-    @GetMapping("/summary/{IdPatient}")
+    @GetMapping("/summary/{idPatient}")
     public ResponseEntity<PatientSummaryDTO> getPatientSummary(@PathVariable int idPatient)
     {
         PatientSummaryDTO patientSummary = reportService.getPatientSummary(idPatient);

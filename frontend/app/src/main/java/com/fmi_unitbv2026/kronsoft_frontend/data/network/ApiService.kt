@@ -25,9 +25,9 @@ interface ApiService {
     @GET("api/patient/profile/{idPatient}")
     suspend fun getPatientProfile(@Path("idPatient") idPatient: Int): PatientProfile
 
-    @GET("api/report/evolution/{IdPatient}")
-    suspend fun getEvolutionData(@Path("IdPatient") idPatient: Int): List<Evolution>
+    @GET("api/report/evolution/{idPatient}")
+    suspend fun getEvolutionData(@Path("idPatient") idPatient: Int): List<Evolution>
 
-    @GET("api/report/summary/{IdPatient}")
-    suspend fun getPatientSummary(@Path("IdPatient") idPatient: Int): PatientSummary
+    @GET("api/report/summary/{idPatient}")
+    suspend fun getPatientSummary(@Path("idPatient") idPatient: Int): PatientSummary
 }

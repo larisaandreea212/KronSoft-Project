@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.util.Log
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.async
 
 class DoctorViewModel : ViewModel() {
 
@@ -43,12 +44,29 @@ class DoctorViewModel : ViewModel() {
     }
 
     fun loadDoctorDashboard(doctorId: Int) {
-        executeApiCall {
-            val info = apiService.getDoctorInfo(doctorId)
-            val patients = apiService.getAllPatientsForDoctor(doctorId)
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
 
-            _doctorInfo.value = info
-            _patientsList.value = patients
+            try {
+                withContext(Dispatchers.IO) {
+                    val infoDeferred = async { apiService.getDoctorInfo(doctorId) }
+                    val patientsDeferred = async { apiService.getAllPatientsForDoctor(doctorId) }
+
+                    val info = infoDeferred.await()
+                    val patients = patientsDeferred.await()
+
+                    withContext(Dispatchers.Main) {
+                        _doctorInfo.value = info
+                        _patientsList.value = patients
+                    }
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Eroare Dashboard: ${e.message}"
+                Log.e("ViewModel", "Eroare la incarcare: ${e.stackTraceToString()}")
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
@@ -73,33 +91,36 @@ class DoctorViewModel : ViewModel() {
     }
 
     fun selectPatient(patientId: Int) {
+
         _patientData.value = null
         _patientSummary.value = null
         _evolutionData.value = emptyList()
 
-        executeApiCall {
-            coroutineScope {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
 
-                launch {
-                    try {
+               try {
+                coroutineScope {
+                    launch {
                         val profile = apiService.getPatientProfile(patientId)
-                        withContext(Dispatchers.Main) { _patientData.value = profile }
-                    } catch (e: Exception) { Log.e("API", "Eroare Profil: ${e.message}") }
-                }
-
-                launch {
-                    try {
+                        _patientData.value = profile
+                    }
+                    launch {
                         val evolution = apiService.getEvolutionData(patientId)
-                        withContext(Dispatchers.Main) { _evolutionData.value = evolution }
-                    } catch (e: Exception) { Log.e("API", "Eroare Evolutie: ${e.message}") }
-                }
-
-                launch {
-                    try {
+                        _evolutionData.value = evolution
+                    }
+                    launch {
                         val summary = apiService.getPatientSummary(patientId)
-                        withContext(Dispatchers.Main) { _patientSummary.value = summary }
-                    } catch (e: Exception) { Log.e("API", "Eroare Sumar: ${e.message}") }
+                        _patientSummary.value = summary
+                    }
                 }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _errorMessage.value = "Eroare la preluarea datelor pacientului"
+                }
+                Log.e("API", "Eroare la selectPatient: ${e.message}")
+            } finally {
+                withContext(Dispatchers.Main) { _isLoading.value = false }
             }
         }
     }
