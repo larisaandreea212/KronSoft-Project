@@ -1,9 +1,12 @@
 package com.fmi_unitbv2026.kronsoft_frontend.data.models
 import com.google.gson.annotations.SerializedName
 
-data class Doctor (
-    @SerializedName("idDoctor")
-    val idDoctor: Long,
+data class CreateDoctor(
+    @SerializedName("email")
+    val email: String,
+
+    @SerializedName("firebaseUid")
+    val firebaseUid: String,
 
     @SerializedName("firstName")
     val firstName: String,
@@ -15,8 +18,5 @@ data class Doctor (
     val specialization: String,
 
     @SerializedName("hospitalName")
-    val hospitalName: String,
-
-    //@SerializedName("isActive")
-    //val isActive: Boolean
+    val hospitalName: String
 )

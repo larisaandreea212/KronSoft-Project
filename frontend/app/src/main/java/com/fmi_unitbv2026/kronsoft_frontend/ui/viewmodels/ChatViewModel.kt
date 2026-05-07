@@ -54,4 +54,8 @@ class ChatViewModel : ViewModel() {
                 }
             }
     }
+
+    fun clearMessages() {
+        _messages.value = emptyList()
+    }
 }

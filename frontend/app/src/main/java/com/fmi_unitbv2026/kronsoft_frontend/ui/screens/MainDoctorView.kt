@@ -24,10 +24,13 @@ import androidx.compose.ui.unit.sp
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.components.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.DoctorViewModel
+import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+                   chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val doctorInfo by viewModel.doctorInfo
     val patientsList by viewModel.patientsList
     val profile by viewModel.patientData
@@ -35,6 +38,7 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
     val evolutions by viewModel.evolutionData
     val isLoading by viewModel.isLoading
     val errorMessage by viewModel.errorMessage
+    val messages by chatViewModel.messages.collectAsState()
 
     var selectedTab by remember { mutableStateOf("all") }
     var searchQuery by remember { mutableStateOf("") }
@@ -50,6 +54,13 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
     if (errorMessage != null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = errorMessage!!, color = Color.Red)
+        }
+    }
+
+    LaunchedEffect(selectedPatientId) {
+        chatViewModel.clearMessages()
+        selectedPatientId?.let { patientId ->
+            chatViewModel.listenForMessages("1", patientId)
         }
     }
 
@@ -182,6 +193,26 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
                         Spacer(modifier = Modifier.height(24.dp))
 
                         QuestionnaireComponent(responses = summary!!.questions)
+
+                        Spacer(modifier = Modifier.height(48.dp))
+
+                        Text(
+                            text = "Chat",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF001F3F)
+                        )
+
+                        ChatComponentVibrant(
+                            messages = messages,
+                            onSendMessage = { text ->
+                                chatViewModel.sendMessage(
+                                    senderId = "1",
+                                    receiverId = selectedPatientId!!,
+                                    text = text
+                                )
+                            }
+                        )
                     }
                 } else {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
