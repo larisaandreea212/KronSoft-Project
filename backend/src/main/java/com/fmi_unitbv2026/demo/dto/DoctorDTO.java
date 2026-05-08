@@ -6,17 +6,19 @@ public class DoctorDTO {
     private String lastName;
     private String specialization;
     private String hospitalName;
+    private boolean isActive;
 
     public DoctorDTO() {}
 
-    public DoctorDTO(int idDoctor, String firstName, String lastName, String specialization, String hospitalName) {
+    public DoctorDTO(int idDoctor, String firstName, String lastName,
+                     String specialization, String hospitalName, boolean isActive) {
         this.idDoctor = idDoctor;
         this.firstName = firstName;
         this.lastName = lastName;
         this.specialization = specialization;
         this.hospitalName = hospitalName;
+        this.isActive = isActive;
     }
-
 
     public int getIdDoctor() {
         return idDoctor;
@@ -52,4 +54,8 @@ public class DoctorDTO {
     public void setHospitalName(String hospitalName) {
         this.hospitalName = hospitalName;
     }
+
+    public boolean isActive() { return isActive; }
+
+    public void setActive(boolean active) { isActive = active; }
 }

@@ -3,6 +3,7 @@ package com.fmi_unitbv2026.demo.dto;
 import com.fmi_unitbv2026.demo.enums.Status;
 
 public class PatientCardDTO {
+
     private String idPatient;
     private String firstName;
     private String lastName;

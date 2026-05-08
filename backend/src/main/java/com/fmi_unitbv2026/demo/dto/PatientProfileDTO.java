@@ -3,6 +3,7 @@ package com.fmi_unitbv2026.demo.dto;
 import java.time.LocalDate;
 
 public class PatientProfileDTO {
+
     private int idPatient;
     private String cnp;
     private String sex;

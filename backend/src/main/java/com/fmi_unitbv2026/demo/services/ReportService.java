@@ -81,11 +81,11 @@ public class ReportService {
 
     private String generateNotes(int score) {
         if (score >= 80) {
-            return "Pacientul prezinta risc critic. Este recomandata verificare medicala urgenta.";
+            return "The patient shows critical risk signs. Urgent medical evaluation is recommended.";
         } else if (score >= 50) {
-            return "Pacientul prezinta semne de agravare. Este recomandata monitorizare atenta.";
+            return "The patient shows signs of deterioration. Close monitoring is recommended.";
         } else {
-            return "Pacientul pare stabil conform raspunsurilor introduse.";
+            return "The patient appears stable based on the submitted responses.";
         }
     }
 }
