@@ -17,6 +17,6 @@ data class Doctor (
     @SerializedName("hospitalName")
     val hospitalName: String,
 
-    //@SerializedName("isActive")
-    //val isActive: Boolean
+    @SerializedName("isActive")
+    val isActive: Boolean
 )

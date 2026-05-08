@@ -25,7 +25,7 @@ import com.fmi_unitbv2026.kronsoft_frontend.data.models.Message
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatComponentVibrant(messages: List<Message>, onSendMessage: (String) -> Unit) {
-    val deepNavy = Color(0xFF000C18)
+    val deepNavy = Color(0xFF001F3F)
     val electricBlue = Color(0xFF00E5FF)
     val royalBlue = Color(0xFF2979FF)
     val accentPurple = Color(0xFF651FFF)
