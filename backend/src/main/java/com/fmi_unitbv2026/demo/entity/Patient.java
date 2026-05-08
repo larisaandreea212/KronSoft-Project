@@ -12,6 +12,10 @@ public class Patient {
     @Column(name = "id_patient")
     private int idPatient;
 
+    @OneToOne
+    @JoinColumn(name = "id_user", nullable = false, unique = true)
+    private User user;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -65,4 +69,7 @@ public class Patient {
 
     public int getIdPatient() { return idPatient; }
     public void setIdPatient(int idPatient) { this.idPatient = idPatient; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

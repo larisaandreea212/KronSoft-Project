@@ -23,7 +23,8 @@ public class DoctorService {
                 doctor.getFirstName(),
                 doctor.getLastName(),
                 doctor.getSpecialization(),
-                doctor.getHospitalName()
+                doctor.getHospitalName(),
+                doctor.isActive()
         );
     }
 }

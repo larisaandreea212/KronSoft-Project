@@ -3,6 +3,7 @@ package com.fmi_unitbv2026.demo.dto;
 import com.fmi_unitbv2026.demo.enums.ResponseType;
 
 public class QuestionResponseDTO {
+
     private String questionText;
     private String answerText;
     private ResponseType responseType;
