@@ -24,5 +24,5 @@ data class CreatePatient(
     val cnp: String,
 
     @SerializedName("idDoctor")
-    val idDoctor: Int
+    val idDoctor: Long
 )
