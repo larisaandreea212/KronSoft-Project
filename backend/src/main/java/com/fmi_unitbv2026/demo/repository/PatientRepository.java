@@ -5,10 +5,15 @@ import com.fmi_unitbv2026.demo.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
     List<Patient> findByDoctor_IdDoctor(int idDoctor);
 
     List<Patient> findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(String lastName, String firstName);
+
+    Optional<Patient> findByUser_IdUser(Integer idUser);
+
+    //metoda ptr schimbare idDoctor o facem mai bine in service
 }
