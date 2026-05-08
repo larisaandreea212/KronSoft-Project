@@ -11,6 +11,10 @@ public class Doctor {
     @Column(name = "id_doctor")
     private int idDoctor;
 
+    @OneToOne
+    @JoinColumn(name = "id_user", nullable = false, unique = true)
+    private User user;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -23,10 +27,16 @@ public class Doctor {
     @Column(name = "hospital_name")
     private String hospitalName;
 
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
     public Doctor() { }
 
     public int getIdDoctor() { return idDoctor; }
     public void setIdDoctor(int idDoctor) { this.idDoctor = idDoctor; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
@@ -39,4 +49,7 @@ public class Doctor {
 
     public String getHospitalName() { return hospitalName; }
     public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
+
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 }
