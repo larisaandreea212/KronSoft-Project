@@ -16,7 +16,7 @@ import kotlinx.coroutines.async
 
 class DoctorViewModel : ViewModel() {
 
-    private val apiService = RetrofitClient.provideApiService()
+    private val apiService = RetrofitClient.apiService
 
     private val _doctorInfo = mutableStateOf<Doctor?>(null)
     val doctorInfo: State<Doctor?> = _doctorInfo

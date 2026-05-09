@@ -22,6 +22,11 @@ public class User {
     private Role role;
 
     public User() { }
+    public User(String email, String firebaseUid, Role role) {
+        this.email = email;
+        this.firebaseUid = firebaseUid;
+        this.role = role;
+    }
 
     public Role getRole() { return role; }
 
