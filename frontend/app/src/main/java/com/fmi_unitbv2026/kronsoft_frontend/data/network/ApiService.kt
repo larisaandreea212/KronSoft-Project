@@ -1,11 +1,30 @@
 package com.fmi_unitbv2026.kronsoft_frontend.data.network
 
-import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.Doctor
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.Evolution
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientProfile
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientSummary
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.User
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.Response
+import retrofit2.http.POST
 
 interface ApiService {
+
+    @GET("api/auth/check-email")
+    suspend fun checkEmailExists(@Query("email") email: String): Boolean
+
+    @POST("api/auth/link-uid")
+    suspend fun linkFirebaseUid(
+        @Query("email") email: String,
+        @Query("uid") uid: String
+    ): Response<Unit>
+
+    @GET("api/users/auth/{uid}")
+    suspend fun getUserByFirebaseUid(@Path("uid") uid: String): User
 
     @GET("api/doctor/{idDoctor}")
     suspend fun getDoctorInfo(@Path("idDoctor") idDoctor: Int): Doctor
