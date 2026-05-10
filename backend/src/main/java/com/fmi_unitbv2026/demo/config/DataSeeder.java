@@ -2,6 +2,7 @@ package com.fmi_unitbv2026.demo.config;
 
 import com.fmi_unitbv2026.demo.entity.*;
 import com.fmi_unitbv2026.demo.enums.ResponseType;
+import com.fmi_unitbv2026.demo.enums.Role;
 import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.repository.*;
 import org.springframework.boot.CommandLineRunner;
@@ -15,60 +16,89 @@ public class DataSeeder {
 
     @Bean
     CommandLineRunner seedData(
+            UserRepository userRepository,
             DoctorRepository doctorRepository,
             PatientRepository patientRepository,
+            ReceptionistRepository receptionistRepository,
             QuestionnaireRepository questionnaireRepository,
             PatientResponseRepository patientResponseRepository,
             AiReportRepository aiReportRepository
     ) {
         return args -> {
 
-            if (doctorRepository.count() > 0) {
+            if (userRepository.count() > 0) {
                 return;
             }
 
+            User doctorUser1 = new User("andrei.popescu@hospital.com", "firebase-doctor-1", Role.DOCTOR);
+            User doctorUser2 = new User("maria.ionescu@hospital.com", "firebase-doctor-2", Role.DOCTOR);
+            User patientUser1 = new User("ion.dumitrescu@email.com", "firebase-patient-1", Role.PATIENT);
+            User patientUser2 = new User("elena.marin@email.com", "firebase-patient-2", Role.PATIENT);
+            User patientUser3 = new User("mihai.stan@email.com", "firebase-patient-3", Role.PATIENT);
+            User receptionistUser = new User("reception@hospital.com", "firebase-receptionist-1", Role.RECEPTIONIST);
+
+            userRepository.save(doctorUser1);
+            userRepository.save(doctorUser2);
+            userRepository.save(patientUser1);
+            userRepository.save(patientUser2);
+            userRepository.save(patientUser3);
+            userRepository.save(receptionistUser);
+
             Doctor doctor1 = new Doctor();
+            doctor1.setUser(doctorUser1);
             doctor1.setFirstName("Andrei");
             doctor1.setLastName("Popescu");
-            doctor1.setSpecialization("Chirurgie generala");
-            doctor1.setHospitalName("Spitalul Clinic Brasov");
+            doctor1.setSpecialization("General Surgery");
+            doctor1.setHospitalName("Brasov Clinical Hospital");
+            doctor1.setActive(true);
 
             Doctor doctor2 = new Doctor();
+            doctor2.setUser(doctorUser2);
             doctor2.setFirstName("Maria");
             doctor2.setLastName("Ionescu");
-            doctor2.setSpecialization("Cardiologie");
-            doctor2.setHospitalName("Spitalul Judetean Brasov");
+            doctor2.setSpecialization("Cardiology");
+            doctor2.setHospitalName("Brasov County Hospital");
+            doctor2.setActive(true);
 
             doctorRepository.save(doctor1);
             doctorRepository.save(doctor2);
 
+            Receptionist receptionist = new Receptionist();
+            receptionist.setUser(receptionistUser);
+            receptionist.setFirstName("Ana");
+            receptionist.setLastName("Georgescu");
+            receptionistRepository.save(receptionist);
+
             Patient p1 = new Patient();
+            p1.setUser(patientUser1);
             p1.setFirstName("Ion");
             p1.setLastName("Dumitrescu");
             p1.setAge(54);
             p1.setSex("M");
             p1.setCNP("1700101123456");
-            p1.setSurgeryType("Apendicectomie");
+            p1.setSurgeryType("Appendectomy");
             p1.setSurgeryDate(LocalDate.now().minusDays(5));
             p1.setDoctor(doctor1);
 
             Patient p2 = new Patient();
+            p2.setUser(patientUser2);
             p2.setFirstName("Elena");
             p2.setLastName("Marin");
             p2.setAge(62);
             p2.setSex("F");
             p2.setCNP("2640202123456");
-            p2.setSurgeryType("Colecistectomie");
+            p2.setSurgeryType("Cholecystectomy");
             p2.setSurgeryDate(LocalDate.now().minusDays(3));
             p2.setDoctor(doctor1);
 
             Patient p3 = new Patient();
+            p3.setUser(patientUser3);
             p3.setFirstName("Mihai");
             p3.setLastName("Stan");
             p3.setAge(47);
             p3.setSex("M");
             p3.setCNP("1770303123456");
-            p3.setSurgeryType("Interventie cardiaca");
+            p3.setSurgeryType("Cardiac intervention");
             p3.setSurgeryDate(LocalDate.now().minusDays(7));
             p3.setDoctor(doctor2);
 
@@ -76,29 +106,10 @@ public class DataSeeder {
             patientRepository.save(p2);
             patientRepository.save(p3);
 
-            Questionnaire q1 = new Questionnaire();
-            q1.setQuestionText("Do you have a fever?");
-            q1.setResponseType(ResponseType.YES_NO);
-            q1.setWeight(20);
-            q1.setInverted(false);
-
-            Questionnaire q2 = new Questionnaire();
-            q2.setQuestionText("Pain level (1-5)");
-            q2.setResponseType(ResponseType.SCALE_1_5);
-            q2.setWeight(30);
-            q2.setInverted(false);
-
-            Questionnaire q3 = new Questionnaire();
-            q3.setQuestionText("Fatigue level (1-5)");
-            q3.setResponseType(ResponseType.SCALE_1_5);
-            q3.setWeight(25);
-            q3.setInverted(false);
-
-            Questionnaire q4 = new Questionnaire();
-            q4.setQuestionText("Do you feel better than yesterday?");
-            q4.setResponseType(ResponseType.YES_NO);
-            q4.setWeight(25);
-            q4.setInverted(true);
+            Questionnaire q1 = createQuestion("Do you have a fever?", ResponseType.YES_NO, 20, false);
+            Questionnaire q2 = createQuestion("Pain level (1-5)", ResponseType.SCALE_1_5, 30, false);
+            Questionnaire q3 = createQuestion("Fatigue level (1-5)", ResponseType.SCALE_1_5, 25, false);
+            Questionnaire q4 = createQuestion("Do you feel better than yesterday?", ResponseType.YES_NO, 25, true);
 
             questionnaireRepository.save(q1);
             questionnaireRepository.save(q2);
@@ -136,6 +147,15 @@ public class DataSeeder {
                     "The patient shows signs of deterioration. Close monitoring is recommended.",
                     LocalDate.now());
         };
+    }
+
+    private Questionnaire createQuestion(String text, ResponseType type, double weight, boolean inverted) {
+        Questionnaire q = new Questionnaire();
+        q.setQuestionText(text);
+        q.setResponseType(type);
+        q.setWeight(weight);
+        q.setInverted(inverted);
+        return q;
     }
 
     private void saveResponse(PatientResponseRepository repository,
