@@ -1,5 +1,6 @@
 package com.fmi_unitbv2026.demo.controller;
 
+import com.fmi_unitbv2026.demo.dto.CreateDoctorDTO;
 import com.fmi_unitbv2026.demo.dto.DoctorDTO;
 import com.fmi_unitbv2026.demo.services.DoctorService;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,11 @@ public class DoctorController {
     {
         DoctorDTO doctorDTO = doctorService.getDoctorById(idDoctor);
         return ResponseEntity.ok(doctorDTO);
+    }
+
+    @PostMapping
+    public ResponseEntity<DoctorDTO> createDoctor(@RequestBody CreateDoctorDTO dto) {
+        DoctorDTO createdDoctor = doctorService.createDoctor(dto);
+        return ResponseEntity.ok(createdDoctor);
     }
 }
