@@ -1,4 +1,5 @@
 package com.fmi_unitbv2026.demo.dto;
+import java.time.LocalDate;
 
 public class CreatePatientDTO {
 
@@ -11,11 +12,12 @@ public class CreatePatientDTO {
     private String surgeryType;
     private int age;
     private int idDoctor;
+    private LocalDate surgeryDate;
 
     public CreatePatientDTO() {}
 
     public CreatePatientDTO(int idDoctor, int age, String surgeryType, String cnp, String sex,
-                            String lastName, String firstName, String firebaseUid, String email) {
+                            String lastName, String firstName, String firebaseUid, String email, LocalDate surgeryDate) {
         this.idDoctor = idDoctor;
         this.age = age;
         this.surgeryType = surgeryType;
@@ -25,6 +27,7 @@ public class CreatePatientDTO {
         this.firstName = firstName;
         this.firebaseUid = firebaseUid;
         this.email = email;
+        this.surgeryDate = surgeryDate;
     }
 
     public String getEmail() { return email; }
@@ -53,4 +56,8 @@ public class CreatePatientDTO {
 
     public int getIdDoctor() { return idDoctor; }
     public void setIdDoctor(int idDoctor) { this.idDoctor = idDoctor; }
+
+    public LocalDate getSurgeryDate() { return surgeryDate;}
+
+    public void setSurgeryDate(LocalDate surgeryDate) { this.surgeryDate = surgeryDate;}
 }

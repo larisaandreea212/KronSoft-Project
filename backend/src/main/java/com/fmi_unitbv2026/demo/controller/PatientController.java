@@ -10,6 +10,7 @@ import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.services.PatientService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fmi_unitbv2026.demo.dto.CreatePatientDTO;
 
 import java.util.List;
 
@@ -68,4 +69,9 @@ public class PatientController {
         return ResponseEntity.ok(patientProfileDTO);
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<PatientProfileDTO> createPatient(@RequestBody CreatePatientDTO dto) {
+        PatientProfileDTO createdPatient = patientService.createPatient(dto);
+        return ResponseEntity.ok(createdPatient);
+    }
 }

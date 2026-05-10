@@ -7,6 +7,12 @@ import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.repository.AiReportRepository;
 import com.fmi_unitbv2026.demo.repository.PatientRepository;
 import org.springframework.stereotype.Service;
+import com.fmi_unitbv2026.demo.dto.CreatePatientDTO;
+import com.fmi_unitbv2026.demo.entity.Doctor;
+import com.fmi_unitbv2026.demo.entity.User;
+import com.fmi_unitbv2026.demo.enums.Role;
+import com.fmi_unitbv2026.demo.repository.DoctorRepository;
+import com.fmi_unitbv2026.demo.repository.UserRepository;
 
 import java.util.List;
 
@@ -15,11 +21,17 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
     private final AiReportRepository aiReportRepository;
+    private final DoctorRepository doctorRepository;
+    private final UserRepository userRepository;
 
     public PatientService(PatientRepository patientRepository,
-                          AiReportRepository aiReportRepository) {
+                          AiReportRepository aiReportRepository,
+                          DoctorRepository doctorRepository,
+                          UserRepository userRepository) {
         this.patientRepository = patientRepository;
         this.aiReportRepository = aiReportRepository;
+        this.doctorRepository = doctorRepository;
+        this.userRepository = userRepository;
     }
 
     public List<PatientCardDTO> getPatientsForDoctor(int idDoctor) {
@@ -98,6 +110,39 @@ public class PatientService {
                 patient.getAge(),
                 patient.getSex(),
                 patient.getCNP()
+        );
+    }
+
+    public PatientProfileDTO createPatient(CreatePatientDTO dto) {
+        Doctor doctor = doctorRepository.findById(dto.getIdDoctor())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setFirebaseUid(dto.getFirebaseUid());
+        user.setRole(Role.PATIENT);
+
+        userRepository.save(user);
+
+        Patient patient = new Patient();
+        patient.setUser(user);
+        patient.setFirstName(dto.getFirstName());
+        patient.setLastName(dto.getLastName());
+        patient.setAge(dto.getAge());
+        patient.setSex(dto.getSex());
+        patient.setCNP(dto.getCnp());
+        patient.setSurgeryType(dto.getSurgeryType());
+        patient.setSurgeryDate(dto.getSurgeryDate());
+        patient.setDoctor(doctor);
+
+        Patient savedPatient = patientRepository.save(patient);
+
+        return new PatientProfileDTO(
+                savedPatient.getIdPatient(),
+                savedPatient.getSurgeryDate(),
+                savedPatient.getAge(),
+                savedPatient.getSex(),
+                savedPatient.getCNP()
         );
     }
 }
