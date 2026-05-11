@@ -7,6 +7,8 @@ import com.fmi_unitbv2026.demo.services.DoctorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/doctor")
 public class DoctorController {
@@ -34,5 +36,21 @@ public class DoctorController {
     public ResponseEntity<Void> deactivateDoctor(@RequestBody DeactivateDoctorDTO dto) {
         doctorService.deactivateDoctor(dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<DoctorDTO>> getActiveDoctors() {
+
+        return ResponseEntity.ok(
+                doctorService.getActiveDoctors()
+        );
+    }
+
+    @GetMapping("/inactive")
+    public ResponseEntity<List<DoctorDTO>> getInactiveDoctors() {
+
+        return ResponseEntity.ok(
+                doctorService.getInactiveDoctors()
+        );
     }
 }

@@ -91,4 +91,36 @@ public class DoctorService {
         doctorToDeactivate.setActive(false);
         doctorRepository.save(doctorToDeactivate);
     }
+
+    public List<DoctorDTO> getActiveDoctors() {
+
+        List<Doctor> doctors = doctorRepository.findByIsActiveTrue();
+
+        return doctors.stream()
+                .map(doctor -> new DoctorDTO(
+                        doctor.getIdDoctor(),
+                        doctor.getFirstName(),
+                        doctor.getLastName(),
+                        doctor.getSpecialization(),
+                        doctor.getHospitalName(),
+                        doctor.isActive()
+                ))
+                .toList();
+    }
+
+    public List<DoctorDTO> getInactiveDoctors() {
+
+        List<Doctor> doctors = doctorRepository.findByIsActiveFalse();
+
+        return doctors.stream()
+                .map(doctor -> new DoctorDTO(
+                        doctor.getIdDoctor(),
+                        doctor.getFirstName(),
+                        doctor.getLastName(),
+                        doctor.getSpecialization(),
+                        doctor.getHospitalName(),
+                        doctor.isActive()
+                ))
+                .toList();
+    }
 }
