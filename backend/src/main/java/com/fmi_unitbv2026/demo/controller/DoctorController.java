@@ -1,6 +1,7 @@
 package com.fmi_unitbv2026.demo.controller;
 
 import com.fmi_unitbv2026.demo.dto.CreateDoctorDTO;
+import com.fmi_unitbv2026.demo.dto.DeactivateDoctorDTO;
 import com.fmi_unitbv2026.demo.dto.DoctorDTO;
 import com.fmi_unitbv2026.demo.services.DoctorService;
 import org.springframework.http.ResponseEntity;
@@ -27,5 +28,11 @@ public class DoctorController {
     public ResponseEntity<DoctorDTO> createDoctor(@RequestBody CreateDoctorDTO dto) {
         DoctorDTO createdDoctor = doctorService.createDoctor(dto);
         return ResponseEntity.ok(createdDoctor);
+    }
+
+    @PatchMapping("/deactivate")
+    public ResponseEntity<Void> deactivateDoctor(@RequestBody DeactivateDoctorDTO dto) {
+        doctorService.deactivateDoctor(dto);
+        return ResponseEntity.noContent().build();
     }
 }
