@@ -13,6 +13,7 @@ import com.fmi_unitbv2026.demo.entity.User;
 import com.fmi_unitbv2026.demo.enums.Role;
 import com.fmi_unitbv2026.demo.repository.DoctorRepository;
 import com.fmi_unitbv2026.demo.repository.UserRepository;
+import com.fmi_unitbv2026.demo.repository.PatientResponseRepository;
 
 import java.util.List;
 
@@ -23,15 +24,18 @@ public class PatientService {
     private final AiReportRepository aiReportRepository;
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
+    private final PatientResponseRepository patientResponseRepository;
 
     public PatientService(PatientRepository patientRepository,
                           AiReportRepository aiReportRepository,
                           DoctorRepository doctorRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          PatientResponseRepository patientResponseRepository) {
         this.patientRepository = patientRepository;
         this.aiReportRepository = aiReportRepository;
         this.doctorRepository = doctorRepository;
         this.userRepository = userRepository;
+        this.patientResponseRepository = patientResponseRepository;
     }
 
     public List<PatientCardDTO> getPatientsForDoctor(int idDoctor) {
@@ -144,5 +148,26 @@ public class PatientService {
                 savedPatient.getSex(),
                 savedPatient.getCNP()
         );
+    }
+
+    public void deletePatient(int idPatient) {
+        Patient patient = patientRepository.findById(idPatient)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        User user = patient.getUser();
+
+        patientResponseRepository.deleteAll(
+                patientResponseRepository.findByPatient_IdPatient(idPatient)
+        );
+
+        aiReportRepository.deleteAll(
+                aiReportRepository.findByPatient_IdPatientOrderByDateAsc(idPatient)
+        );
+
+        patientRepository.delete(patient);
+
+        if (user != null) {
+            userRepository.delete(user);
+        }
     }
 }

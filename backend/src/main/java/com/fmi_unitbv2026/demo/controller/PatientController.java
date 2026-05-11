@@ -74,4 +74,10 @@ public class PatientController {
         PatientProfileDTO createdPatient = patientService.createPatient(dto);
         return ResponseEntity.ok(createdPatient);
     }
+
+    @DeleteMapping("/{idPatient}")
+    public ResponseEntity<Void> deletePatient(@PathVariable int idPatient) {
+        patientService.deletePatient(idPatient);
+        return ResponseEntity.noContent().build();
+    }
 }
