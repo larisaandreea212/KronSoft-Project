@@ -70,4 +70,7 @@ interface ApiService {
 
     @DELETE("api/patient/{idPatient}")
     suspend fun deletePatient(@Path("idPatient") idPatient: Int): Response<Unit>
+
+    @GET("api/doctor/user/{userId}")
+    suspend fun getDoctorByUserId(@Path("userId") userId: Int): Doctor
 }

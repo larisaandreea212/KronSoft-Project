@@ -25,6 +25,7 @@ import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.components.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.DoctorViewModel
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.ChatViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +58,21 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
         }
     }
 
-    LaunchedEffect(selectedPatientId) {
-        chatViewModel.clearMessages()
-        selectedPatientId?.let { patientId ->
-            chatViewModel.listenForMessages("1", patientId)
+    LaunchedEffect(Unit) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            viewModel.initializeSession(uid)
+        }
+    }
+
+    // 2. Logică Chat - se declanșează când se schimbă pacientul sau când doctorInfo e gata
+    LaunchedEffect(selectedPatientId, doctorInfo) {
+        if (selectedPatientId != null && doctorInfo != null) {
+            chatViewModel.clearMessages()
+            chatViewModel.listenForMessages(
+                doctorId = doctorInfo!!.idDoctor.toString(),
+                patientId = selectedPatientId!!
+            )
         }
     }
 
@@ -72,160 +84,160 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
                 onTabSelected = { tab ->
                     selectedTab = tab
                     if (tab == "critical") {
-                        viewModel.loadCriticalPatients(1)
+                        viewModel.loadCriticalPatients(doctor.idDoctor.toInt())
                     } else {
-                        viewModel.loadDoctorDashboard(1)
+                        viewModel.loadDoctorDashboard(doctor.idDoctor.toInt())
                     }
                 }
             )
-        }
 
-        Column(
-            modifier = Modifier
-                .weight(1.1f)
-                .fillMaxHeight()
-                .background(Color(0xFFF4F7FA))
-                .padding(horizontal = 20.dp, vertical = 32.dp)
-        ) {
-            Text(
-                text = "Patients",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF001F3F),
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    viewModel.searchPatients( 1, it)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search...", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color(0xFF00E5FF)
-                ),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier
+                    .weight(1.1f)
+                    .fillMaxHeight()
+                    .background(Color(0xFFF4F7FA))
+                    .padding(horizontal = 20.dp, vertical = 32.dp)
             ) {
-                val filteredList = if (selectedTab == "critical") {
-                    patientsList.filter { it.status == PatientStatus.CRITICAL }
-                } else {
-                    patientsList
-                }
+                Text(
+                    text = "Patients",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFF001F3F),
+                    fontWeight = FontWeight.ExtraBold
+                )
 
-                items(patientsList) { patient ->
-                    PatientCardComponent(
-                        patient = patient,
-                        isSelected = selectedPatientId == patient.idPatient,
-                        onClick = {
-                            selectedPatientId = patient.idPatient
+                Spacer(modifier = Modifier.height(20.dp))
 
-                            val idAsInt = patient.idPatient.toIntOrNull() ?: 0
-                            viewModel.selectPatient(idAsInt)
-                        }
-                    )
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        viewModel.searchPatients( doctor.idDoctor.toInt(), it)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search...", color = Color.Gray, fontSize = 14.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedBorderColor = Color(0xFF00E5FF)
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val filteredList = if (selectedTab == "critical") {
+                        patientsList.filter { it.status == PatientStatus.CRITICAL }
+                    } else {
+                        patientsList
+                    }
+
+                    items(patientsList) { patient ->
+                        PatientCardComponent(
+                            patient = patient,
+                            isSelected = selectedPatientId == patient.idPatient,
+                            onClick = {
+                                selectedPatientId = patient.idPatient
+
+                                val idAsInt = patient.idPatient.toIntOrNull() ?: 0
+                                viewModel.selectPatient(idAsInt)
+                            }
+                        )
+                    }
                 }
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .weight(2f)
-                .fillMaxHeight()
-                .background(Color.White)
-        ) {
-            if (selectedPatientId != null) {
-                if (profile != null && summary != null) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(32.dp)
-                    ) {
-                        Text(
-                            text = "Patient Profile: ${profile!!.CNP}",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                            DetailItem("Age", "${profile!!.age}")
-                            DetailItem("Sex", profile!!.sex)
-                            DetailItem("Surgery Date", profile!!.surgeryDate)
-                        }
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF001F3F)),
-                            shape = RoundedCornerShape(16.dp)
+            Box(
+                modifier = Modifier
+                    .weight(2f)
+                    .fillMaxHeight()
+                    .background(Color.White)
+            ) {
+                if (selectedPatientId != null) {
+                    if (profile != null && summary != null) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(32.dp)
                         ) {
-                            Column(modifier = Modifier.padding(24.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("AI ANALYSIS", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    Text("Risk Score: ${summary!!.aiScore}%", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "Patient Profile: ${profile!!.CNP}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                                DetailItem("Age", "${profile!!.age}")
+                                DetailItem("Sex", profile!!.sex)
+                                DetailItem("Surgery Date", profile!!.surgeryDate)
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF001F3F)),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(24.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("AI ANALYSIS", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        Text("Risk Score: ${summary!!.aiScore}%", color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(summary!!.aiNote, color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, lineHeight = 22.sp)
                                 }
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(summary!!.aiNote, color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, lineHeight = 22.sp)
                             }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            EvolutionChartComponent(data = evolutions)
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            QuestionnaireComponent(responses = summary!!.questions)
+
+                            Spacer(modifier = Modifier.height(48.dp))
+
+                            Text(
+                                text = "Chat",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF001F3F)
+                            )
+
+                            ChatComponentVibrant(
+                                messages = messages,
+                                onSendMessage = { text ->
+                                    chatViewModel.sendMessage(
+                                        senderId = doctor.idDoctor.toString(),
+                                        receiverId = selectedPatientId!!,
+                                        text = text
+                                    )
+                                }
+                            )
                         }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        EvolutionChartComponent(data = evolutions)
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        QuestionnaireComponent(responses = summary!!.questions)
-
-                        Spacer(modifier = Modifier.height(48.dp))
-
-                        Text(
-                            text = "Chat",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF001F3F)
-                        )
-
-                        ChatComponentVibrant(
-                            messages = messages,
-                            onSendMessage = { text ->
-                                chatViewModel.sendMessage(
-                                    senderId = "1",
-                                    receiverId = selectedPatientId!!,
-                                    text = text
-                                )
-                            }
-                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = Color(0xFF00E5FF))
+                        }
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFF00E5FF))
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Select a patient to see the medical dashboard", color = Color.LightGray)
                     }
-                }
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Select a patient to see the medical dashboard", color = Color.LightGray)
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.fmi_unitbv2026.demo.controller;
 
+import com.fmi_unitbv2026.demo.repository.DoctorRepository;
 import com.fmi_unitbv2026.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    private DoctorRepository doctorRepository;
 
     @GetMapping("/auth/{uid}")
     public ResponseEntity<User> getUserByFirebaseUid(@PathVariable String uid) {
@@ -22,4 +24,5 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 }

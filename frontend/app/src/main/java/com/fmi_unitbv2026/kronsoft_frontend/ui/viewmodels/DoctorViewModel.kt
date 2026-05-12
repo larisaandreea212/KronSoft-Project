@@ -40,7 +40,33 @@ class DoctorViewModel : ViewModel() {
     val errorMessage: State<String?> = _errorMessage
 
     init {
-        loadDoctorDashboard(1)
+
+    }
+
+    fun initializeSession(firebaseUid: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            try {
+                val user = withContext(Dispatchers.IO) {
+                    apiService.getUserByFirebaseUid(firebaseUid)
+                }
+
+                val doctor = withContext(Dispatchers.IO) {
+                    apiService.getDoctorByUserId(user.idUser)
+                }
+
+                _doctorInfo.value = doctor
+                loadDoctorDashboard(doctor.idDoctor.toInt())
+
+            } catch (e: Exception) {
+                _errorMessage.value = "Auth Sync Error: ${e.message}"
+                Log.e("ViewModel", "Eroare la legare UID: ${e.stackTraceToString()}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun loadDoctorDashboard(doctorId: Int) {

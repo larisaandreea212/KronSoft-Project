@@ -3,6 +3,8 @@ package com.fmi_unitbv2026.demo.controller;
 import com.fmi_unitbv2026.demo.dto.CreateDoctorDTO;
 import com.fmi_unitbv2026.demo.dto.DeactivateDoctorDTO;
 import com.fmi_unitbv2026.demo.dto.DoctorDTO;
+import com.fmi_unitbv2026.demo.entity.Doctor;
+import com.fmi_unitbv2026.demo.repository.DoctorRepository;
 import com.fmi_unitbv2026.demo.services.DoctorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,11 @@ import java.util.List;
 public class DoctorController {
 
     private final DoctorService doctorService;
+    private DoctorRepository doctorRepository;
 
-    public DoctorController(DoctorService doctorService) {
+    public DoctorController(DoctorService doctorService, DoctorRepository doctorRepository) {
         this.doctorService = doctorService;
+        this.doctorRepository = doctorRepository;
     }
 
     @GetMapping("/{idDoctor}")
@@ -52,5 +56,12 @@ public class DoctorController {
         return ResponseEntity.ok(
                 doctorService.getInactiveDoctors()
         );
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Doctor> getDoctorByUserId(@PathVariable Integer userId) {
+        return doctorRepository.findByUser_IdUser(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
