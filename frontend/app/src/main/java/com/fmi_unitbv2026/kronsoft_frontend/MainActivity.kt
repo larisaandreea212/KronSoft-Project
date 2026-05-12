@@ -17,9 +17,12 @@ import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.LoginViewModel
 import com.fmi_unitbv2026.kronsoft_frontend.ui.views.MainDoctorView
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.RegisterViewModel
 import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.RegisterScreen
-import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.ReceptionistViewModel
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.ReceptionistScreen
+import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.*
+import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.AddDoctorScreen
 import androidx.compose.material3.Text
+import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.AddPatientScreen
+import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.MainReceptionistView
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,8 @@ class MainActivity : ComponentActivity() {
         val loginViewModel = LoginViewModel(authRepository)
         val registerViewModel = RegisterViewModel(authRepository)
         val receptionistViewModel = ReceptionistViewModel(apiService)
+        val addDoctorViewModel = AddDoctorViewModel(apiService)
+        val addPatientViewModel = AddPatientViewModel(apiService)
 
         setContent {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
@@ -65,14 +70,40 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("receptionist_dashboard") {
-                        ReceptionistScreen(
+                        MainReceptionistView(
                             viewModel = receptionistViewModel,
                             onLogout = {
                                 // Te trimite la login și șterge istoricul
                                 navController.navigate("login") {
                                     popUpTo(0)
                                 }
+                            },
+                            onNavigateToAddDoctor = {
+                                navController.navigate("add_doctor_screen")
+                            },
+                            onNavigateToAddPatient = {
+                                navController.navigate("add_patient_screen")
                             }
+                        )
+                    }
+
+                    composable("add_doctor_screen") {
+                        AddDoctorScreen(
+                            viewModel = addDoctorViewModel,
+                            onCancel = {
+                                navController.popBackStack()
+                            },
+                            onSuccess = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable("add_patient_screen") {
+                        AddPatientScreen(
+                            viewModel = addPatientViewModel,
+                            onCancel = { navController.popBackStack() },
+                            onSuccess = { navController.popBackStack() }
                         )
                     }
 

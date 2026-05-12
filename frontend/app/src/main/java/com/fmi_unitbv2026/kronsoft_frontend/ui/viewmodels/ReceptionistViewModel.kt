@@ -1,45 +1,77 @@
 package com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fmi_unitbv2026.kronsoft_frontend.data.repository.AuthRepository
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.Doctor
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.DeactivateDoctor
 import com.fmi_unitbv2026.kronsoft_frontend.data.network.ApiService
 import kotlinx.coroutines.launch
 
 class ReceptionistViewModel(private val apiService: ApiService) : ViewModel() {
 
-    var patientName = mutableStateOf("")
-    var patientEmail = mutableStateOf("")
-    var selectedRole = mutableStateOf("PATIENT") // Default este pacient
+    var activeDoctors by mutableStateOf<List<Doctor>>(emptyList())
+    var inactiveDoctors by mutableStateOf<List<Doctor>>(emptyList())
+    var patientsForSelectedDoctor by mutableStateOf<List<PatientCard>>(emptyList())
 
-    var isLoading = mutableStateOf(false)
-    var statusMessage = mutableStateOf<String?>(null)
+    var isLoading by mutableStateOf(false)
+    var errorMessage by mutableStateOf<String?>(null)
 
-    fun preRegisterPatient() {
-        if (patientName.value.isEmpty() || patientEmail.value.isEmpty()) {
-            statusMessage.value = "Please fill all fields."
-            return
-        }
+    init {
+        loadDoctors()
+    }
 
-        isLoading.value = true
+    fun loadDoctors() {
         viewModelScope.launch {
             try {
-                // Trimitem datele la Java
-                // Notă: Va trebui să definim acest endpoint în ApiService
-                val response = apiService.linkFirebaseUid(patientEmail.value, "PRE_REG")
+                activeDoctors = apiService.getActiveDoctors()
+                inactiveDoctors = apiService.getInactiveDoctors()
+            } catch (e: Exception) {
+                errorMessage = "Failed to load doctors: ${e.message}"
+            }
+        }
+    }
 
+    fun loadPatients(idDoctor: Int) {
+        viewModelScope.launch {
+            try {
+                patientsForSelectedDoctor = apiService.getAllPatientsForDoctor(idDoctor)
+            } catch (e: Exception) {
+                errorMessage = "Failed to load patients"
+            }
+        }
+    }
+
+    fun deletePatient(idPatient: String) {
+        viewModelScope.launch {
+            try {
+                // Convertim String în Int pentru API-ul de Java
+                val response = apiService.deletePatient(idPatient.toInt())
                 if (response.isSuccessful) {
-                    statusMessage.value = "Patient ${patientEmail.value} pre-registered successfully!"
-                    patientName.value = ""
-                    patientEmail.value = ""
-                } else {
-                    statusMessage.value = "Error: ${response.code()}"
+                    // Refresh local al listei
+                    patientsForSelectedDoctor = patientsForSelectedDoctor.filter { it.idPatient != idPatient }
                 }
             } catch (e: Exception) {
-                statusMessage.value = "Connection error: ${e.message}"
+                errorMessage = "Delete failed"
+            }
+        }
+    }
+
+    fun deactivateDoctor(oldDoctorId: Int, newDoctorId: Int) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val dto = DeactivateDoctor(idOldDoctor = oldDoctorId, idNewDoctor = newDoctorId)
+                val response = apiService.deactivateDoctor(dto)
+                if (response.isSuccessful) {
+                    loadDoctors()
+                    patientsForSelectedDoctor = emptyList()
+                }
+            } catch (e: Exception) {
+                errorMessage = "Deactivation failed"
             } finally {
-                isLoading.value = false
+                isLoading = false
             }
         }
     }

@@ -19,17 +19,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.CreatePatient
-import com.fmi_unitbv2026.kronsoft_frontend.data.models.Doctor
+import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.AddPatientViewModel
 
 @Composable
 fun AddPatientScreen(
-    availableDoctors: List<Doctor>,
+    viewModel: AddPatientViewModel,
     onCancel: () -> Unit,
-    onConfirm: (CreatePatient, String) -> Unit
+    onSuccess: () -> Unit
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -39,16 +38,28 @@ fun AddPatientScreen(
     var age by remember { mutableStateOf("") }
     var sex by remember { mutableStateOf("") }
     var cnp by remember { mutableStateOf("") }
-
+    var surgeryDate by remember { mutableStateOf("") } // Format: YYYY-MM-DD
+    var surgeryType by remember { mutableStateOf("") }
     var doctorSearchName by remember { mutableStateOf("") }
 
     val scrollState = rememberScrollState()
 
-    val foundDoctor = availableDoctors.find {
+    LaunchedEffect(viewModel.isSuccess) {
+        if (viewModel.isSuccess) {
+            onSuccess()
+        }
+    }
+
+    val foundDoctor = viewModel.activeDoctors.find {
         val fullName = "${it.firstName} ${it.lastName}".lowercase()
         val reverseFullName = "${it.lastName} ${it.firstName}".lowercase()
         fullName.contains(doctorSearchName.lowercase()) || reverseFullName.contains(doctorSearchName.lowercase())
     }.takeIf { doctorSearchName.length > 2 }
+
+    val isFormValid = firstName.isNotBlank() && lastName.isNotBlank() &&
+            email.isNotBlank() && password.length >= 6 &&
+            cnp.length == 13 && foundDoctor != null &&
+            surgeryDate.isNotBlank() && surgeryType.isNotBlank()
 
     Column(
         modifier = Modifier
@@ -65,34 +76,57 @@ fun AddPatientScreen(
             color = Color(0xFF001F3F)
         )
 
+        Text(
+            text = "Assign a patient to a doctor and create their secure account.",
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+
         Spacer(modifier = Modifier.height(32.dp))
 
+        viewModel.errorMessage?.let { error ->
+            Surface(
+                color = Color.Red.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            ) {
+                Text(error, color = Color.Red, modifier = Modifier.padding(12.dp), fontSize = 14.sp)
+            }
+        }
+
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            StyledInputField2(value = firstName, onValueChange = { firstName = it }, label = "Patient First Name", modifier = Modifier.weight(1f))
-            StyledInputField2(value = lastName, onValueChange = { lastName = it }, label = "Patient Last Name", modifier = Modifier.weight(1f))
+            StyledInputField(value = firstName, onValueChange = { firstName = it }, label = "First Name", modifier = Modifier.weight(1f), enabled = !viewModel.isLoading)
+            StyledInputField(value = lastName, onValueChange = { lastName = it }, label = "Last Name", modifier = Modifier.weight(1f), enabled = !viewModel.isLoading)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            StyledInputField2(value = age, onValueChange = { age = it }, label = "Age", modifier = Modifier.weight(0.4f))
-            StyledInputField2(value = sex, onValueChange = { sex = it }, label = "Sex (M/F)", modifier = Modifier.weight(0.6f))
+            StyledInputField(value = age, onValueChange = { if(it.all { char -> char.isDigit() }) age = it }, label = "Age", modifier = Modifier.weight(0.4f), enabled = !viewModel.isLoading)
+            StyledInputField(value = sex, onValueChange = { sex = it.uppercase() }, label = "Sex (M/F)", modifier = Modifier.weight(0.6f), enabled = !viewModel.isLoading)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        StyledInputField2(value = cnp, onValueChange = { cnp = it }, label = "CNP")
+        StyledInputField(value = cnp, onValueChange = { if(it.length <= 13) cnp = it }, label = "CNP (13 digits)", enabled = !viewModel.isLoading)
 
         Spacer(modifier = Modifier.height(16.dp))
-        StyledInputField2(value = email, onValueChange = { email = it }, label = "Patient Email")
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            StyledInputField(value = surgeryDate, onValueChange = { surgeryDate = it }, label = "Surgery Date (YYYY-MM-DD)", modifier = Modifier.weight(1f), enabled = !viewModel.isLoading)
+            StyledInputField(value = surgeryType, onValueChange = { surgeryType = it }, label = "Surgery Type", modifier = Modifier.weight(1f), enabled = !viewModel.isLoading)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        StyledInputField(value = email, onValueChange = { email = it }, label = "Patient Email", enabled = !viewModel.isLoading)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Patient Password") },
+            label = { Text("Initial Password (min. 6 chars)") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
+            enabled = !viewModel.isLoading,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
@@ -112,17 +146,17 @@ fun AddPatientScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("Assigning Doctor", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF001F3F))
-        Text("Search for doctor by name", fontSize = 13.sp, color = Color.Gray)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = doctorSearchName,
             onValueChange = { doctorSearchName = it },
-            label = { Text("Doctor Name") },
+            label = { Text("Search Doctor by Name") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            leadingIcon = { Icon(Icons.Default.PersonSearch, contentDescription = null, tint = Color(0xFF00E5FF)) },
+            enabled = !viewModel.isLoading,
+            leadingIcon = { Icon(Icons.Default.PersonSearch, null, tint = Color(0xFF00E5FF)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color(0xFF00E5FF),
                 unfocusedBorderColor = Color.LightGray
@@ -138,27 +172,17 @@ fun AddPatientScreen(
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column {
-                        Text("Linked to:", fontSize = 12.sp, color = Color(0xFF00796B), fontWeight = FontWeight.Bold)
+                        Text("Selected Doctor:", fontSize = 12.sp, color = Color(0xFF00796B), fontWeight = FontWeight.Bold)
                         Text("Dr. ${foundDoctor.firstName} ${foundDoctor.lastName}", fontWeight = FontWeight.ExtraBold)
                         Text(foundDoctor.specialization, fontSize = 12.sp)
                     }
                 }
             }
-        } else if (doctorSearchName.length > 2) {
-            Text(
-                "No doctor matches this name. Check spelling.",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-            )
         }
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(
                 onClick = {
                     foundDoctor?.let { doctor ->
@@ -170,9 +194,11 @@ fun AddPatientScreen(
                             age = age.toIntOrNull() ?: 0,
                             sex = sex,
                             cnp = cnp,
+                            surgeryDate = surgeryDate,
+                            surgeryType = surgeryType,
                             idDoctor = doctor.idDoctor
                         )
-                        onConfirm(patient, password)
+                        viewModel.registerPatient(patient, password)
                     }
                 },
                 modifier = Modifier.height(54.dp).weight(1f),
@@ -181,31 +207,38 @@ fun AddPatientScreen(
                     disabledContainerColor = Color(0xFF00E5FF).copy(alpha = 0.3f)
                 ),
                 shape = RoundedCornerShape(12.dp),
-                enabled = foundDoctor != null && password.isNotEmpty() && email.isNotEmpty()
+                enabled = isFormValid && !viewModel.isLoading
             ) {
-                Text("Register Patient", color = Color(0xFF001F3F), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF001F3F), strokeWidth = 2.dp)
+                } else {
+                    Text("Register Patient", color = Color(0xFF001F3F), fontWeight = FontWeight.Bold)
+                }
             }
 
             OutlinedButton(
                 onClick = onCancel,
                 modifier = Modifier.height(54.dp).weight(1f),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                enabled = !viewModel.isLoading
             ) {
-                Text("Cancel", color = Color.Gray, fontSize = 16.sp)
+                Text("Cancel", color = Color.Gray)
             }
         }
-
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
 @Composable
-fun StyledInputField2(
+
+fun StyledInputField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -221,12 +254,3 @@ fun StyledInputField2(
     )
 }
 
-@Preview(showBackground = true, widthDp = 800, heightDp = 1000)
-@Composable
-fun AddPatientScreenPreview() {
-    val mockDoctors = listOf(
-        Doctor(1, "John", "Smith", "Cardiology", "Central Hospital", true),
-        Doctor(2, "Emily", "Watson", "Neurology", "St. Mary Clinic", true)
-    )
-    AddPatientScreen(availableDoctors = mockDoctors, onCancel = {}, onConfirm = { _, _ -> })
-}

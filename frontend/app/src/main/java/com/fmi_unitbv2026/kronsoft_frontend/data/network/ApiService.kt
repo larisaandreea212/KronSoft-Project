@@ -5,12 +5,15 @@ import com.fmi_unitbv2026.kronsoft_frontend.data.models.Evolution
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientProfile
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientSummary
-import com.fmi_unitbv2026.kronsoft_frontend.data.models.User
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.Response
 import retrofit2.http.POST
+import retrofit2.http.PATCH
+import retrofit2.http.Body
+import retrofit2.http.DELETE
 
 interface ApiService {
 
@@ -49,4 +52,22 @@ interface ApiService {
 
     @GET("api/report/summary/{idPatient}")
     suspend fun getPatientSummary(@Path("idPatient") idPatient: Int): PatientSummary
+
+    @POST("api/doctor")
+    suspend fun createDoctor(@Body doctor: CreateDoctor): Response<Doctor>
+
+    @PATCH("api/doctor/deactivate")
+    suspend fun deactivateDoctor(@Body deactivateDto: DeactivateDoctor): Response<Unit>
+
+    @GET("api/doctor/active")
+    suspend fun getActiveDoctors(): List<Doctor>
+
+    @GET("api/doctor/inactive")
+    suspend fun getInactiveDoctors(): List<Doctor>
+
+    @POST("api/patient/create")
+    suspend fun createPatient(@Body patient: CreatePatient): Response<PatientProfile>
+
+    @DELETE("api/patient/{idPatient}")
+    suspend fun deletePatient(@Path("idPatient") idPatient: Int): Response<Unit>
 }

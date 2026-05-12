@@ -57,7 +57,7 @@ public class DoctorService {
         doctor.setHospitalName(dto.getHospitalName());
 
         doctor.setUser(user);
-
+        doctor.setActive(true);
         doctorRepository.save(doctor);
 
         return new DoctorDTO(

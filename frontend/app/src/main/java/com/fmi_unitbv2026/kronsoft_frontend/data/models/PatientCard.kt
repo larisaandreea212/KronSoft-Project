@@ -15,5 +15,5 @@ data class PatientCard (
     val surgeryType: String,
 
     @SerializedName("status")
-    val status: PatientStatus
+    val status: PatientStatus?
 )

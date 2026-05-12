@@ -1,5 +1,6 @@
 package com.fmi_unitbv2026.kronsoft_frontend.data.models
 import com.google.gson.annotations.SerializedName
+import java.time.LocalDate
 
 data class CreatePatient(
     @SerializedName("email")
@@ -22,6 +23,12 @@ data class CreatePatient(
 
     @SerializedName("cnp")
     val cnp: String,
+
+    @SerializedName("surgeryType")
+    val surgeryType: String,
+
+    @SerializedName("surgeryDate")
+    val surgeryDate: String,
 
     @SerializedName("idDoctor")
     val idDoctor: Long

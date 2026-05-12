@@ -25,6 +25,7 @@ fun PatientCardComponent(patient: PatientCard, isSelected: Boolean = false, onCl
         PatientStatus.CRITICAL -> Color(0xFFE53935)
         PatientStatus.MODERATE -> Color(0xFFFFB300)
         PatientStatus.STABLE -> Color(0xFF43A047)
+        else -> Color(0xFFBDBDBD)
     }
 
     Card(
