@@ -88,7 +88,12 @@ fun ChatComponentVibrant(messages: List<Message>, onSendMessage: (String) -> Uni
                 )
 
                 IconButton(
-                    onClick = { newMessage = "" },
+                    onClick = {
+                        if (newMessage.isNotBlank()) {
+                            onSendMessage(newMessage) // Trimitem textul către ViewModel
+                            newMessage = ""           // Ștergem căsuța DOAR după ce am trimis
+                        }
+                    },
                     modifier = Modifier
                         .size(40.dp)
                         .background(doctorBrush, CircleShape)

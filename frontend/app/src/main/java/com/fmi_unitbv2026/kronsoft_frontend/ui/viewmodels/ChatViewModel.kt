@@ -16,14 +16,18 @@ class ChatViewModel : ViewModel() {
     val messages: StateFlow<List<Message>> = _messages
 
     fun sendMessage(senderId: String, receiverId: String, text: String) {
+        if (text.isBlank()) return
+
         val message = Message(senderId, receiverId, text)
+
+        println("DEBUG: Încerc să trimit mesajul: ${text} de la ${senderId} către ${receiverId}")
 
         messagesCollection.add(message)
             .addOnSuccessListener {
-                println("Message sent succesfully to Firestore!")
+                println("DEBUG: SUCCES! Mesajul a ajuns în Firestore.")
             }
             .addOnFailureListener { e ->
-                println("Error: ${e.message}")
+                println("DEBUG: EROARE Firebase: ${e.message}")
             }
     }
 
