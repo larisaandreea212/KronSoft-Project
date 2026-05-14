@@ -43,4 +43,13 @@ class RegisterViewModel(private val repository: AuthRepository) : ViewModel() {
             }
         }
     }
+
+    fun resetFields() {
+        email.value = ""
+        password.value = ""
+        confirmPassword.value = ""
+        isLoading.value = false
+        errorMessage.value = null
+        isSuccess.value = false
+    }
 }

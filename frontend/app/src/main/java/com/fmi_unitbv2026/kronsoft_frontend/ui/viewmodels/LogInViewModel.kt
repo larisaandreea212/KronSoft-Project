@@ -54,4 +54,11 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         repository.logout()
         onLogoutSuccess()
     }
+
+    fun resetFields() {
+        email.value = ""
+        password.value = ""
+        _errorMessage.value = null
+        _isLoading.value = false
+    }
 }
