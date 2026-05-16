@@ -27,11 +27,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inițializăm serviciile
         val apiService = RetrofitClient.apiService
         val authRepository = AuthRepository(apiService)
 
-        // ViewModel-urile au nevoie de repository
         val loginViewModel = LoginViewModel(authRepository)
         val registerViewModel = RegisterViewModel(authRepository)
         val receptionistViewModel = ReceptionistViewModel(apiService)
@@ -44,7 +42,6 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = "login") {
 
-                    // --- ECRAN LOGIN ---
                     composable("login") {
                         LoginScreen(
                             viewModel = loginViewModel,
@@ -63,7 +60,7 @@ class MainActivity : ComponentActivity() {
                                         popUpTo("login") { inclusive = true }
                                     }
                                     else -> {
-                                        // Opțional: un mesaj dacă rolul e necunoscut
+
                                     }
                                 }
                             }
@@ -73,7 +70,6 @@ class MainActivity : ComponentActivity() {
                         MainReceptionistView(
                             viewModel = receptionistViewModel,
                             onLogout = {
-                                // Te trimite la login și șterge istoricul
                                 navController.navigate("login") {
                                     popUpTo(0)
                                 }
@@ -107,7 +103,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // --- ECRAN REGISTER ---
                     composable("register") {
                         RegisterScreen(
                             viewModel = registerViewModel,
@@ -117,12 +112,9 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("patient_dashboard") {
-                        Surface(modifier = Modifier.fillMaxSize()) {
-                            Text(text = "Patient Dashboard - Under Construction")
-                        }
+                        
                     }
 
-                    // --- ECRAN DASHBOARD DOCTOR ---
                     composable("doctor_dashboard") {
                         MainDoctorView()
                     }

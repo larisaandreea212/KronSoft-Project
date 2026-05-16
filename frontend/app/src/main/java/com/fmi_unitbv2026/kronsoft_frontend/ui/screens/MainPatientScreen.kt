@@ -25,7 +25,7 @@ import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.components.ChatComponentVibrant
 
 @Composable
-fun MainPatientDesktopScreen(
+fun MainPatientScreen(
     patient: PatientCard,
     patientProfile: PatientProfile,
     canComplete: Boolean,
@@ -352,7 +352,7 @@ fun MainPatientDesktopPreview() {
         Message("1", "1", "Bună ziua! Cum vă simțiți astăzi?"),)
 
     Surface {
-        MainPatientDesktopScreen(
+        MainPatientScreen(
             patient = mockPatient,
             patientProfile = mockProfile,
             canComplete = true,

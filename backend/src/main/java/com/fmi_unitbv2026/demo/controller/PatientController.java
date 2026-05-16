@@ -5,6 +5,7 @@ import com.fmi_unitbv2026.demo.dto.PatientCardDTO;
 import com.fmi_unitbv2026.demo.dto.PatientProfileDTO;
 import com.fmi_unitbv2026.demo.dto.PatientSummaryDTO;
 import com.fmi_unitbv2026.demo.dto.QuestionResponseDTO;
+import com.fmi_unitbv2026.demo.entity.Patient;
 import com.fmi_unitbv2026.demo.enums.ResponseType;
 import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.services.PatientService;
@@ -79,5 +80,11 @@ public class PatientController {
     public ResponseEntity<Void> deletePatient(@PathVariable int idPatient) {
         patientService.deletePatient(idPatient);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/by-user/{idUser}")
+    public ResponseEntity<PatientProfileDTO> getPatientByUserId(@PathVariable int idUser) {
+        PatientProfileDTO patient = patientService.getPatientProfileByUserId(idUser);
+        return ResponseEntity.ok(patient);
     }
 }

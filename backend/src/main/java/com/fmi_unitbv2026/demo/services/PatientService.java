@@ -6,6 +6,7 @@ import com.fmi_unitbv2026.demo.entity.Patient;
 import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.repository.AiReportRepository;
 import com.fmi_unitbv2026.demo.repository.PatientRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import com.fmi_unitbv2026.demo.dto.CreatePatientDTO;
 import com.fmi_unitbv2026.demo.entity.Doctor;
@@ -169,5 +170,18 @@ public class PatientService {
         if (user != null) {
             userRepository.delete(user);
         }
+    }
+
+    public PatientProfileDTO getPatientProfileByUserId(int idUser) {
+        Patient patient = patientRepository.findByUser_IdUser(idUser)
+                .orElseThrow(() -> new EntityNotFoundException("Patient not found for user id: " + idUser));
+
+        return new PatientProfileDTO(
+                patient.getIdPatient(),
+                patient.getSurgeryDate(),
+                patient.getAge(),
+                patient.getSex(),
+                patient.getCNP()
+        );
     }
 }
