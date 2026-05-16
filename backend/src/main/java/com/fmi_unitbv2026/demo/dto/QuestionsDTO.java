@@ -1,12 +1,14 @@
 package com.fmi_unitbv2026.demo.dto;
 
+import com.fmi_unitbv2026.demo.enums.ResponseType;
+
 public class QuestionsDTO {
     private int idQuestions;
     private String questionText;
-    private String responseType;
+    private ResponseType responseType;
 
 
-    public QuestionsDTO(int idQuestions, String responseType, String questionText) {
+    public QuestionsDTO(int idQuestions, ResponseType responseType, String questionText) {
         this.idQuestions = idQuestions;
         this.responseType = responseType;
         this.questionText = questionText;
@@ -26,10 +28,10 @@ public class QuestionsDTO {
         this.questionText = questionText;
     }
 
-    public String getResponseType() {
+    public ResponseType getResponseType() {
         return responseType;
     }
-    public void setResponseType(String responseType) {
+    public void setResponseType(ResponseType responseType) {
         this.responseType = responseType;
     }
 }

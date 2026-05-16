@@ -22,8 +22,8 @@ public class QuestionnaireService {
                 .stream()
                 .map(questionnaire -> new QuestionsDTO(
                         questionnaire.getIdQuestion(),
-                        questionnaire.getQuestionText(),
-                        questionnaire.getResponseType().name() // enum -> String
+                        questionnaire.getResponseType(), // enum -> String
+                        questionnaire.getQuestionText()
                 ))
                 .collect(Collectors.toList());
     }

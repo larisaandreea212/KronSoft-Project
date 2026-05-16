@@ -3,7 +3,7 @@ import com.google.gson.annotations.SerializedName
 
 data class PatientProfile (
     @SerializedName("idPacient")
-    val idPacient: Int,
+    val idPatient: Int,
 
     @SerializedName("cnp")
     val CNP: String,

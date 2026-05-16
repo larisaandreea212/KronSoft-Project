@@ -22,6 +22,9 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _userRole = mutableStateOf<String?>(null)
     val userRole: State<String?> = _userRole
 
+    private val _loggedUserId = mutableStateOf<Int>(0)
+    val loggedUserId: State<Int> = _loggedUserId
+
     fun onLoginClick(onNavigationRequested: (String) -> Unit) {
         if (email.value.isEmpty() || password.value.isEmpty()) {
             _errorMessage.value = "Te rugăm să completezi toate câmpurile."
@@ -38,6 +41,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
                 if (user != null) {
                     _userRole.value = user.role
+                    _loggedUserId.value = user.idUser
                     onNavigationRequested(user.role)
                 } else {
                     _errorMessage.value = "Email sau parolă incorectă."

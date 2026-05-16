@@ -74,6 +74,15 @@ interface ApiService {
     @GET("api/doctor/user/{userId}")
     suspend fun getDoctorByUserId(@Path("userId") userId: Int): Doctor
 
-    @GET("api/patients/by-user/{idUser}")
+    @GET("api/patient/by-user/{idUser}")
     suspend fun getPatientProfileByUserId(@Path("idUser") idUser: Int): PatientProfile
+
+    @GET("api/questions")
+    suspend fun loadQuestions(): List<Questions>
+
+    @GET("api/ai-reports/can-complete/{idPatient}")
+    suspend fun checkDailyCompletion(@Path("idPatient") idPatient: Int): Response<Boolean>
+
+    @POST("api/ai-reports/submit")
+    suspend fun submitDailyQuestionnaire(@Body submission: QuestionnaireSubmission): Response<AIReportResponse>
 }

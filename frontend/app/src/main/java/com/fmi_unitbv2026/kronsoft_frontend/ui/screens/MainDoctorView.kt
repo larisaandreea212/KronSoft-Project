@@ -1,4 +1,5 @@
 package com.fmi_unitbv2026.kronsoft_frontend.ui.views
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,8 +30,10 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-                   chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+fun MainDoctorView(
+    viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onLogout: () -> Unit // 1. Adăugat parametrul onLogout cerut de navigație
 ) {
     val doctorInfo by viewModel.doctorInfo
     val patientsList by viewModel.patientsList
@@ -88,6 +91,11 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
                     } else {
                         viewModel.loadDoctorDashboard(doctor.idDoctor.toInt())
                     }
+                },
+                onLogout = { // 2. Legat acțiunea de logout din sidebar
+                    FirebaseAuth.getInstance().signOut()
+                    chatViewModel.clearMessages()
+                    onLogout()
                 }
             )
 
@@ -137,7 +145,7 @@ fun MainDoctorView(viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.com
                         patientsList
                     }
 
-                    items(patientsList) { patient ->
+                    items(filteredList) { patient -> // corectat micul typo din codul inițial pentru filtrare
                         PatientCardComponent(
                             patient = patient,
                             isSelected = selectedPatientId == patient.idPatient,
@@ -253,7 +261,12 @@ fun DetailItem(label: String, value: String) {
 }
 
 @Composable
-fun DoctorSidebar(doctor: Doctor, selectedTab: String, onTabSelected: (String) -> Unit) {
+fun DoctorSidebar(
+    doctor: Doctor,
+    selectedTab: String,
+    onTabSelected: (String) -> Unit,
+    onLogout: () -> Unit // 3. Adăugat parametrul și în constructorul de Sidebar
+) {
     val deepNavy = Color(0xFF000814)
     val royalBlue = Color(0xFF001F3F)
     val sidebarGradient = Brush.verticalGradient(colors = listOf(deepNavy, royalBlue))
@@ -284,7 +297,14 @@ fun DoctorSidebar(doctor: Doctor, selectedTab: String, onTabSelected: (String) -
             SidebarNavItem("Critical Patients", selectedTab == "critical") { onTabSelected("critical") }
         }
         Spacer(modifier = Modifier.weight(1f))
-        Text("Sign Out", color = Color.White.copy(alpha = 0.3f), fontSize = 13.sp, modifier = Modifier.padding(horizontal = 24.dp).clickable { })
+        Text(
+            text = "Sign Out",
+            color = Color.White.copy(alpha = 0.5f), // Crescut opacitatea de la 0.3f ca să se vadă mai bine textul
+            fontSize = 13.sp,
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .clickable { onLogout() } // 4. Activat click-ul spre funcția de deconectare
+        )
     }
 }
 
@@ -311,5 +331,5 @@ fun SidebarNavItem(label: String, isSelected: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true, widthDp = 1400, heightDp = 900)
 @Composable
 fun MainDoctorViewPreview() {
-    MainDoctorView()
+    MainDoctorView(onLogout = {}) // Adăugat lambda gol în preview ca să nu dea eroare de compilare
 }
