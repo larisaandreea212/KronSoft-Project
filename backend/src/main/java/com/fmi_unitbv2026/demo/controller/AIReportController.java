@@ -30,6 +30,13 @@ public class AIReportController {
         return ResponseEntity.ok(canComplete);
     }
 
+    @GetMapping("/last/{idPatient}")
+    public ResponseEntity<AIReport> getLastReport(@PathVariable int idPatient) {
+        return aiReportService.getLastReport(idPatient)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());

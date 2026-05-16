@@ -89,4 +89,8 @@ public class AIReportService {
 
         return aiReportRepository.save(report);
     }
+
+    public java.util.Optional<AIReport> getLastReport(int idPatient) {
+        return aiReportRepository.findTopByPatient_IdPatientOrderByDateDesc(idPatient);
+    }
 }
