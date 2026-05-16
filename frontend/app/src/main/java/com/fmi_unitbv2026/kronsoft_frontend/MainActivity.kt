@@ -29,6 +29,7 @@ import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.MainReceptionistView
 import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.RegisterScreen
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.views.MainDoctorView
+import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,24 +91,20 @@ class MainActivity : ComponentActivity() {
                         }
 
                         val profile = patientViewModel.patientProfileDto.value
+                        val card = patientViewModel.patientCard.value
                         val canComplete = patientViewModel.canCompleteToday.value
                         val questions = patientViewModel.questionsList.value
+                        val summary = patientViewModel.patientSummary.value
                         val errorMessage = patientViewModel.errorMessage.value
 
                         if (profile != null) {
-                            val patientCard = com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard(
-                                idPatient = profile.idPatient.toString(),
-                                firstName = "Elena",
-                                lastName = "Marin",
-                                surgeryType = "ACL Reconstruction",
-                                status = com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientStatus.STABLE
-                            )
-
                             MainPatientScreen(
-                                patient = patientCard,
+                                patient = card,
                                 patientProfile = profile,
                                 canComplete = canComplete,
                                 questions = questions,
+                                patientSummary = summary,
+                                viewModel = patientViewModel,
                                 messages = emptyList(), // Pregătit pentru Firebase
                                 onSendMessage = { text ->
                                     // Legătura pentru funcția ta sendMessage(...) din Firebase chat

@@ -23,13 +23,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.components.ChatComponentVibrant
-
+import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.PatientViewModel
 @Composable
 fun MainPatientScreen(
     patient: PatientCard,
     patientProfile: PatientProfile,
     canComplete: Boolean,
     questions: List<Questions>,
+    patientSummary: PatientSummary?,
+    viewModel: PatientViewModel,
     messages: List<Message>,
     onSendMessage: (String) -> Unit,
     onLogout: () -> Unit
@@ -97,7 +99,27 @@ fun MainPatientScreen(
                     onAnswerSelected = { qId, answer -> userAnswers[qId] = answer },
                     onNext = { if (currentQuestionIndex < questions.size - 1) currentQuestionIndex++ },
                     onBack = { if (currentQuestionIndex > 0) currentQuestionIndex-- },
-                    onFinish = { isQuestionnaireActive = false; currentQuestionIndex = 0; userAnswers.clear() }
+                    onFinish = {
+                        val answersList = userAnswers.map { (questionId, answerValue) ->
+                            Answer(
+                                idQuestion = questionId,
+                                answerText = answerValue
+                            )
+                        }
+
+                        val submission = QuestionnaireSubmission(
+                            idPatient = patient.idPatient.toInt(),
+                            answers = answersList
+                        )
+
+                         viewModel.submitDailyQuestionnaire(submission) { success ->
+                            if (success) {
+                                isQuestionnaireActive = false
+                                currentQuestionIndex = 0
+                                userAnswers.clear()
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -121,7 +143,7 @@ fun MainPatientScreen(
                 modifier = Modifier.fillMaxWidth().height(200.dp),
                 contentAlignment = Alignment.Center
             ) {
-                val scoreProgress = 0.75f
+                val scoreProgress = (patientSummary?.aiScore?.toFloat() ?: 0f) / 100f
                 CircularProgressIndicator(
                     progress = { scoreProgress },
                     modifier = Modifier.size(140.dp),
@@ -152,7 +174,7 @@ fun MainPatientScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Your recovery is ahead of schedule. Pain levels have stabilized in the last 48h. Keep up the mobility exercises.",
+                        text = patientSummary?.aiNote ?: "No insights available for today yet. Complete your questionnaire.",
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 13.sp,
                         lineHeight = 18.sp
@@ -185,9 +207,16 @@ fun ActiveQuestionnaireView(
     onBack: () -> Unit,
     onFinish: () -> Unit
 ) {
+    val electricBlue = Color(0xFF00E5FF)
+    if (questions.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = electricBlue)
+        }
+        return
+    }
+
     val currentQuestion = questions[currentIndex]
     val selectedAnswer = userAnswers[currentQuestion.idQuestion]
-    val electricBlue = Color(0xFF00E5FF)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(550.dp)) {
         Text("Question ${currentIndex + 1} of ${questions.size}", color = Color.Gray, fontSize = 14.sp)
@@ -316,50 +345,16 @@ fun DesktopQuestionnaireCard(canComplete: Boolean, gradient: Brush, onStart: () 
                 Button(onClick = onStart, modifier = Modifier.width(220.dp).height(56.dp), contentPadding = PaddingValues(), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
                     Box(Modifier.fillMaxSize().background(gradient), Alignment.Center) { Text("START NOW", color = Color.White, fontWeight = FontWeight.Black) }
                 }
-            } else {
-                Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF00E676), modifier = Modifier.size(60.dp))
-                Text("Everything updated!", color = Color.White, fontSize = 20.sp)
-            }
+            } else {Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF00E676), modifier = Modifier.size(60.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "You have already completed the questionnaire today.\nPlease return tomorrow.",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp
+            )}
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 1440, heightDp = 900)
-@Composable
-fun MainPatientDesktopPreview() {
-    val mockPatient = PatientCard(
-        idPatient = "1",
-        firstName = "Alex",
-        lastName = "Morgan",
-        surgeryType = "ACL Reconstruction",
-        status = PatientStatus.STABLE
-    )
-
-    val mockProfile = PatientProfile(
-        1,
-        "1920815123456",
-        32,
-        "Male",
-        "2024-05-10"
-    )
-
-    val mockQuestions = listOf(
-        Questions(1, "How is your pain level today?", ResponseType.SCALE_1_5),
-        Questions(2, "Have you performed your morning exercises?", ResponseType.YES_NO)
-    )
-
-    val mockMessages = listOf(
-        Message("1", "1", "Bună ziua! Cum vă simțiți astăzi?"),)
-
-    Surface {
-        MainPatientScreen(
-            patient = mockPatient,
-            patientProfile = mockProfile,
-            canComplete = true,
-            questions = mockQuestions,
-            messages = mockMessages,
-            onSendMessage = {},
-            onLogout = {}
-        )
     }
 }

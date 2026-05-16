@@ -38,7 +38,11 @@ class PatientViewModel : ViewModel() {
     private val _isSubmitting = mutableStateOf(false)
     val isSubmitting: State<Boolean> = _isSubmitting
 
+    private val _patientSummary = mutableStateOf<PatientSummary?>(null)
+    val patientSummary: State<PatientSummary?> = _patientSummary
 
+    private val _patientCard = mutableStateOf<PatientCard?>(null)
+    val patientCard: State<PatientCard?> = _patientCard
     // 3. Modificăm funcția ta să le lanseze pe toate automat
     fun initializePatientSession(userId: Int) {
         viewModelScope.launch {
@@ -56,6 +60,11 @@ class PatientViewModel : ViewModel() {
                 if (profile != null) {
                     // CORECTAT: profile.idPatient este Int direct, nu mai are nevoie de "?: 0"
                     val patientId = profile.idPatient
+
+                    val card = withContext(Dispatchers.IO) {
+                        apiService.getPatientCardById(patientId)
+                    }
+                    _patientCard.value = card
 
                     // Chemăm în paralel/secvențial celelalte încărcări de date
                     loadQuestions()
@@ -110,7 +119,7 @@ class PatientViewModel : ViewModel() {
                 val response = withContext(Dispatchers.IO) {
                     apiService.getPatientSummary(idPatient)
                 }
-                // Aici poți salva într-o stare dedicată pentru PatientSummary dacă ai una
+                _patientSummary.value = response
             } catch (e: Exception) {
                 Log.e("PatientViewModel", "Eroare la loadAIEvaluation: ${e.message}")
             }

@@ -87,4 +87,15 @@ public class PatientController {
         PatientProfileDTO patient = patientService.getPatientProfileByUserId(idUser);
         return ResponseEntity.ok(patient);
     }
+
+    @GetMapping("/card/{idPatient}")
+    public ResponseEntity<PatientCardDTO> getPatientCardById(@PathVariable Integer idPatient) {
+        PatientCardDTO cardDto = patientService.getPatientCardById(idPatient);
+
+        if (cardDto != null) {
+            return ResponseEntity.ok(cardDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

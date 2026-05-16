@@ -85,4 +85,7 @@ interface ApiService {
 
     @POST("api/ai-reports/submit")
     suspend fun submitDailyQuestionnaire(@Body submission: QuestionnaireSubmission): Response<AIReportResponse>
+
+    @GET("api/patient/card/{idPatient}")
+    suspend fun getPatientCardById(@Path("idPatient") idPatient: Int): PatientCard
 }

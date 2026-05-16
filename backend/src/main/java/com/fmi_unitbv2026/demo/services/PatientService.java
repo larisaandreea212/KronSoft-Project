@@ -7,6 +7,7 @@ import com.fmi_unitbv2026.demo.enums.Status;
 import com.fmi_unitbv2026.demo.repository.AiReportRepository;
 import com.fmi_unitbv2026.demo.repository.PatientRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fmi_unitbv2026.demo.dto.CreatePatientDTO;
 import com.fmi_unitbv2026.demo.entity.Doctor;
@@ -182,6 +183,26 @@ public class PatientService {
                 patient.getAge(),
                 patient.getSex(),
                 patient.getCNP()
+        );
+    }
+
+
+    public PatientCardDTO getPatientCardById(Integer idPatient) {
+        Patient patient = patientRepository.findById(idPatient).orElse(null);
+        if (patient == null) {
+            return null;
+        }
+
+        Status currentStatus = aiReportRepository.findTopByPatient_IdPatientOrderByDateDesc(idPatient)
+                .map(AIReport::getStatus)
+                .orElse(Status.STABLE);
+
+        return new PatientCardDTO(
+                String.valueOf(patient.getIdPatient()),
+                patient.getFirstName(),
+                patient.getLastName(),
+                patient.getSurgeryType(),
+                currentStatus
         );
     }
 }
