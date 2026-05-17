@@ -222,8 +222,11 @@ fun MainDoctorView(
                                 color = Color(0xFF001F3F)
                             )
 
-                            ChatComponentVibrant(
+                            // ACTUALIZAT: Apelăm denumirea corectă ChatComponent și activăm isDoctorView
+                            // În MainDoctorView.kt, modifică doar bucata asta din ChatComponent:
+                            ChatComponent(
                                 messages = messages,
+                                isDoctorView = true,
                                 onSendMessage = { text ->
                                     chatViewModel.sendMessage(
                                         senderId = doctor.idDoctor.toString(),

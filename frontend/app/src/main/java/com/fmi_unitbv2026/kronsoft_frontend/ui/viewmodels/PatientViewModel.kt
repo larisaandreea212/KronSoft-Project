@@ -15,7 +15,6 @@ class PatientViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.apiService
 
-    // 1. Stări existente pentru Profil
     private val _patientProfileDto = mutableStateOf<PatientProfile?>(null)
     val patientProfileDto: State<PatientProfile?> = _patientProfileDto
 
@@ -25,7 +24,6 @@ class PatientViewModel : ViewModel() {
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage: State<String?> = _errorMessage
 
-    // 2. STĂRI NOI pentru noile endpoint-uri
     private val _questionsList = mutableStateOf<List<Questions>>(emptyList())
     val questionsList: State<List<Questions>> = _questionsList
 
@@ -43,22 +41,20 @@ class PatientViewModel : ViewModel() {
 
     private val _patientCard = mutableStateOf<PatientCard?>(null)
     val patientCard: State<PatientCard?> = _patientCard
-    // 3. Modificăm funcția ta să le lanseze pe toate automat
+
     fun initializePatientSession(userId: Int) {
+        Log.d("INVESTIGATIE", "!!! VALOAREA LUI USER_ID PRIMITĂ ESTE: $userId !!!")
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
 
             try {
-                // Pasul A: Încărcăm profilul pacientului bazat pe userId-ul din login
                 val profile = withContext(Dispatchers.IO) {
                     apiService.getPatientProfileByUserId(userId)
                 }
                 _patientProfileDto.value = profile
 
-                // Pasul B: Dacă profilul s-a încărcat cu succes, pornim automat celelalte date
                 if (profile != null) {
-                    // CORECTAT: profile.idPatient este Int direct, nu mai are nevoie de "?: 0"
                     val patientId = profile.idPatient
 
                     val card = withContext(Dispatchers.IO) {
@@ -66,7 +62,6 @@ class PatientViewModel : ViewModel() {
                     }
                     _patientCard.value = card
 
-                    // Chemăm în paralel/secvențial celelalte încărcări de date
                     loadQuestions()
                     checkDailyCompletion(patientId)
                     loadAIEvaluation(patientId)
@@ -81,7 +76,6 @@ class PatientViewModel : ViewModel() {
         }
     }
 
-    // 4. Endpoint: loadQuestions (Aduce întrebările active)
     private fun loadQuestions() {
         viewModelScope.launch {
             try {
@@ -95,7 +89,6 @@ class PatientViewModel : ViewModel() {
         }
     }
 
-    // 5. Endpoint: checkDailyCompletion (Verifică dacă are voie să completeze azi)
     fun checkDailyCompletion(idPatient: Int) {
         viewModelScope.launch {
             try {
@@ -103,7 +96,6 @@ class PatientViewModel : ViewModel() {
                     apiService.checkDailyCompletion(idPatient)
                 }
                 if (response.isSuccessful) {
-                    // canCompleteToday va fi true dacă NU a completat încă, false dacă a completat deja
                     _canCompleteToday.value = response.body() ?: false
                 }
             } catch (e: Exception) {
@@ -112,7 +104,6 @@ class PatientViewModel : ViewModel() {
         }
     }
 
-    // 6. Endpoint: loadAIEvaluation (Aduce cel mai recent scor de risc și note AI)
     fun loadAIEvaluation(idPatient: Int) {
         viewModelScope.launch {
             try {
@@ -126,7 +117,6 @@ class PatientViewModel : ViewModel() {
         }
     }
 
-    // 7. Endpoint: submitDailyQuestionnaire (Trimite răspunsurile când apasă "COMPLETE")
     fun submitDailyQuestionnaire(submission: QuestionnaireSubmission, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             _isSubmitting.value = true
@@ -135,11 +125,9 @@ class PatientViewModel : ViewModel() {
                     apiService.submitDailyQuestionnaire(submission)
                 }
                 if (response.isSuccessful) {
-                    // CORECTAT: Folosim variabila corectă idPatient extrasă în siguranță
                     val idPatient = _patientProfileDto.value?.idPatient ?: 0
                     checkDailyCompletion(idPatient)
-
-                    onResult(true) // Anunțăm UI-ul că a mers bine
+                    onResult(true)
                 } else {
                     onResult(false)
                 }

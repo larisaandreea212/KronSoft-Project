@@ -10,6 +10,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,15 +23,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.fmi_unitbv2026.kronsoft_frontend.data.network.RetrofitClient
 import com.fmi_unitbv2026.kronsoft_frontend.data.repository.AuthRepository
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.AddDoctorScreen
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.AddPatientScreen
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.LoginScreen
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.MainPatientScreen
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.MainReceptionistView
-import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.RegisterScreen
+import com.fmi_unitbv2026.kronsoft_frontend.ui.screens.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.*
 import com.fmi_unitbv2026.kronsoft_frontend.ui.views.MainDoctorView
-import com.fmi_unitbv2026.kronsoft_frontend.data.models.PatientCard
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,21 +46,18 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = "login") {
 
+                    // 1. ECRANUL DE LOGIN
                     composable("login") {
                         LoginScreen(
                             viewModel = loginViewModel,
-                            onNavigateToRegister = {
-                                navController.navigate("register")
-                            },
+                            onNavigateToRegister = { navController.navigate("register") },
                             onLoginSuccess = { role ->
                                 when (role) {
                                     "DOCTOR" -> navController.navigate("doctor_dashboard") {
                                         popUpTo("login") { inclusive = true }
                                     }
                                     "PATIENT" -> {
-                                        // MODIFICAT ACUM: Preluăm ID-ul utilizatorului logat din ViewModel
                                         val userId = loginViewModel.loggedUserId.value
-                                        // Navigăm către ruta dinamică configurată dedesubt pentru a evita crash-ul
                                         navController.navigate("patient_dashboard/$userId") {
                                             popUpTo("login") { inclusive = true }
                                         }
@@ -77,15 +70,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    // 2. DASHBOARD PACIENT
+                    // Caută această rută în MainActivity.kt și înlocuiește-o complet:
                     composable(
                         route = "patient_dashboard/{userId}",
                         arguments = listOf(navArgument("userId") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val userId = backStackEntry.arguments?.getInt("userId") ?: 1
-
                         val patientViewModel: PatientViewModel = viewModel()
+                        val chatViewModel: ChatViewModel = viewModel() // Instanțiem ViewModel-ul de chat real
 
-                        // Încărcăm dinamic sesiunea pe baza userId-ului real primit din login
                         LaunchedEffect(userId) {
                             patientViewModel.initializePatientSession(userId)
                         }
@@ -96,8 +90,31 @@ class MainActivity : ComponentActivity() {
                         val questions = patientViewModel.questionsList.value
                         val summary = patientViewModel.patientSummary.value
                         val errorMessage = patientViewModel.errorMessage.value
+                        val isLoading = patientViewModel.isLoading.value
 
-                        if (profile != null) {
+                        // 1. Colectăm mesajele live din StateFlow-ul din Firestore (Rezolvă eroarea de tip!)
+                        val messages by chatViewModel.messages.collectAsState()
+
+                        // 2. Pornim ascultarea în timp real când avem datele pacientului
+                        LaunchedEffect(profile, card) {
+                            if (profile != null && card != null) {
+                                val doctorIdStr = "1" // ID-ul doctorului implicit din sistem
+                                chatViewModel.listenForMessages(
+                                    doctorId = doctorIdStr,
+                                    patientId = profile.idPatient.toString()
+                                )
+                            }
+                        }
+
+                        if (isLoading) {
+                            Box(modifier = Modifier.fillMaxSize().background(Color(0xFF001220)), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(color = Color(0xFF00E5FF))
+                            }
+                        } else if (errorMessage != null) {
+                            Box(modifier = Modifier.fillMaxSize().background(Color(0xFF001220)), contentAlignment = Alignment.Center) {
+                                Text(text = "Eroare rețea: $errorMessage", color = Color.Red)
+                            }
+                        } else if (profile != null && card != null) {
                             MainPatientScreen(
                                 patient = card,
                                 patientProfile = profile,
@@ -105,92 +122,63 @@ class MainActivity : ComponentActivity() {
                                 questions = questions,
                                 patientSummary = summary,
                                 viewModel = patientViewModel,
-                                messages = emptyList(), // Pregătit pentru Firebase
+                                messages = messages, // Pasăm lista reală de obiecte Message
+
+                                    // Pacientul trimite: el este sender, doctorul este receiver
+                                    // În MainActivity.kt, modifică doar bucata asta din MainPatientScreen:
                                 onSendMessage = { text ->
-                                    // Legătura pentru funcția ta sendMessage(...) din Firebase chat
+                                    val doctorIdStr = "1"
+                                    chatViewModel.sendMessage(
+                                        senderId = profile.idPatient.toString(),
+                                        receiverId = doctorIdStr,
+                                        text = text
+                                    )
                                 },
                                 onLogout = {
-                                    // MODIFICAT ACUM: Resetăm câmpurile din login și curățăm complet istoricul navigației
+                                    chatViewModel.clearMessages()
                                     loginViewModel.resetFields()
-                                    navController.navigate("login") {
-                                        popUpTo(0) { inclusive = true }
-                                    }
+                                    navController.navigate("login") { popUpTo(0) { inclusive = true } }
                                 }
                             )
-                        } else if (errorMessage != null) {
-                            Box(
-                                modifier = Modifier.fillMaxSize().background(Color(0xFF001220)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Eroare rețea: $errorMessage",
-                                    color = Color.Red
-                                )
-                            }
                         } else {
-                            Box(
-                                modifier = Modifier.fillMaxSize().background(Color(0xFF001220)),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Box(modifier = Modifier.fillMaxSize().background(Color(0xFF001220)), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator(color = Color(0xFF00E5FF))
                             }
                         }
                     }
-
+                   // 3. DASHBOARD RECEPTIONER
                     composable("receptionist_dashboard") {
                         MainReceptionistView(
                             viewModel = receptionistViewModel,
                             onLogout = {
                                 loginViewModel.resetFields()
-                                navController.navigate("login") {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                                navController.navigate("login") { popUpTo(0) { inclusive = true } }
                             },
-                            onNavigateToAddDoctor = {
-                                navController.navigate("add_doctor_screen")
-                            },
-                            onNavigateToAddPatient = {
-                                navController.navigate("add_patient_screen")
-                            }
+                            onNavigateToAddDoctor = { navController.navigate("add_doctor_screen") },
+                            onNavigateToAddPatient = { navController.navigate("add_patient_screen") }
                         )
                     }
 
+                    // 4. ECRANE SECUNDARE RECEPTIE
                     composable("add_doctor_screen") {
-                        AddDoctorScreen(
-                            viewModel = addDoctorViewModel,
-                            onCancel = {
-                                navController.popBackStack()
-                            },
-                            onSuccess = {
-                                navController.popBackStack()
-                            }
-                        )
+                        AddDoctorScreen(viewModel = addDoctorViewModel, onCancel = { navController.popBackStack() }, onSuccess = { navController.popBackStack() })
                     }
 
                     composable("add_patient_screen") {
-                        AddPatientScreen(
-                            viewModel = addPatientViewModel,
-                            onCancel = { navController.popBackStack() },
-                            onSuccess = { navController.popBackStack() }
-                        )
+                        AddPatientScreen(viewModel = addPatientViewModel, onCancel = { navController.popBackStack() }, onSuccess = { navController.popBackStack() })
                     }
 
+                    // 5. ECRAN REGISTER
                     composable("register") {
-                        RegisterScreen(
-                            viewModel = registerViewModel,
-                            onNavigateBackToLogin = {
-                                navController.popBackStack()
-                            }
-                        )
+                        RegisterScreen(viewModel = registerViewModel, onNavigateBackToLogin = { navController.popBackStack() })
                     }
 
+                    // 6. DASHBOARD DOCTOR
                     composable("doctor_dashboard") {
                         MainDoctorView(
                             onLogout = {
                                 loginViewModel.resetFields()
-                                navController.navigate("login") {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                                navController.navigate("login") { popUpTo(0) { inclusive = true } }
                             }
                         )
                     }

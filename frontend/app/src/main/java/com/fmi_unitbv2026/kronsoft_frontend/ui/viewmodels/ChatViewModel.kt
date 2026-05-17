@@ -1,4 +1,4 @@
-package com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels;
+package com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,12 +15,23 @@ class ChatViewModel : ViewModel() {
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages
 
+    // Am lăsat exact cei 3 parametri originali (senderId, receiverId, text) ca să nu mai dea erori în ecrane!
     fun sendMessage(senderId: String, receiverId: String, text: String) {
         if (text.isBlank()) return
 
-        val message = Message(senderId, receiverId, text)
+        // Logica automată: dacă cel care trimite are ID-ul de doctor (ex: nu e egal cu ID-ul pacientului din sesiune)
+        // O metodă simplă: dacă receiverId este "1" (doctorul implicit), înseamnă că senderId este PACIENTUL (deci isFromDoctor = false)
+        val isDoctor = (receiverId != "1")
 
-        println("DEBUG: Încerc să trimit mesajul: ${text} de la ${senderId} către ${receiverId}")
+        val message = Message(
+            senderId = senderId,
+            receiverId = receiverId,
+            text = text,
+            timestamp = System.currentTimeMillis(),
+            isFromDoctor = isDoctor
+        )
+
+        println("DEBUG: Trimit în Firestore: $text | Sender: $senderId | IsFromDoctor: $isDoctor")
 
         messagesCollection.add(message)
             .addOnSuccessListener {
@@ -30,7 +41,6 @@ class ChatViewModel : ViewModel() {
                 println("DEBUG: EROARE Firebase: ${e.message}")
             }
     }
-
 
     fun listenForMessages(doctorId: String, patientId: String) {
         messagesCollection

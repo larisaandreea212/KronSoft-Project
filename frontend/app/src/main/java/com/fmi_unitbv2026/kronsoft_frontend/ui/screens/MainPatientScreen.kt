@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.fmi_unitbv2026.kronsoft_frontend.data.models.*
-import com.fmi_unitbv2026.kronsoft_frontend.ui.components.ChatComponentVibrant
+import com.fmi_unitbv2026.kronsoft_frontend.ui.components.ChatComponent
 import com.fmi_unitbv2026.kronsoft_frontend.ui.viewmodels.PatientViewModel
 @Composable
 fun MainPatientScreen(
@@ -191,7 +191,7 @@ fun MainPatientScreen(
                     .padding(16.dp)
                     .clip(RoundedCornerShape(24.dp))
             ) {
-                ChatComponentVibrant(messages = messages, onSendMessage = onSendMessage)
+                ChatComponent(messages = messages, onSendMessage = onSendMessage)
             }
         }
     }
