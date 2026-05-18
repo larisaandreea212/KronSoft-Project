@@ -8,7 +8,6 @@ data class Message(
     val text: String = "",
     val timestamp: Long = System.currentTimeMillis(),
 
-    // Forțăm Firebase să mapeze corect din clasa Java/Kotlin în documentul Firestore
     @get:PropertyName("fromDoctor")
     @set:PropertyName("fromDoctor")
     var isFromDoctor: Boolean = false

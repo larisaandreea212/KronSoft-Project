@@ -46,7 +46,6 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = "login") {
 
-                    // 1. ECRANUL DE LOGIN
                     composable("login") {
                         LoginScreen(
                             viewModel = loginViewModel,
@@ -70,15 +69,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // 2. DASHBOARD PACIENT
-                    // Caută această rută în MainActivity.kt și înlocuiește-o complet:
                     composable(
                         route = "patient_dashboard/{userId}",
                         arguments = listOf(navArgument("userId") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val userId = backStackEntry.arguments?.getInt("userId") ?: 1
                         val patientViewModel: PatientViewModel = viewModel()
-                        val chatViewModel: ChatViewModel = viewModel() // Instanțiem ViewModel-ul de chat real
+                        val chatViewModel: ChatViewModel = viewModel()
 
                         LaunchedEffect(userId) {
                             patientViewModel.initializePatientSession(userId)
@@ -92,13 +89,11 @@ class MainActivity : ComponentActivity() {
                         val errorMessage = patientViewModel.errorMessage.value
                         val isLoading = patientViewModel.isLoading.value
 
-                        // 1. Colectăm mesajele live din StateFlow-ul din Firestore (Rezolvă eroarea de tip!)
                         val messages by chatViewModel.messages.collectAsState()
 
-                        // 2. Pornim ascultarea în timp real când avem datele pacientului
                         LaunchedEffect(profile, card) {
                             if (profile != null && card != null) {
-                                val doctorIdStr = "1" // ID-ul doctorului implicit din sistem
+                                val doctorIdStr = "1" 
                                 chatViewModel.listenForMessages(
                                     doctorId = doctorIdStr,
                                     patientId = profile.idPatient.toString()
@@ -122,10 +117,7 @@ class MainActivity : ComponentActivity() {
                                 questions = questions,
                                 patientSummary = summary,
                                 viewModel = patientViewModel,
-                                messages = messages, // Pasăm lista reală de obiecte Message
-
-                                    // Pacientul trimite: el este sender, doctorul este receiver
-                                    // În MainActivity.kt, modifică doar bucata asta din MainPatientScreen:
+                                messages = messages,
                                 onSendMessage = { text ->
                                     val doctorIdStr = "1"
                                     chatViewModel.sendMessage(
@@ -146,7 +138,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-                   // 3. DASHBOARD RECEPTIONER
                     composable("receptionist_dashboard") {
                         MainReceptionistView(
                             viewModel = receptionistViewModel,
@@ -159,7 +150,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // 4. ECRANE SECUNDARE RECEPTIE
                     composable("add_doctor_screen") {
                         AddDoctorScreen(viewModel = addDoctorViewModel, onCancel = { navController.popBackStack() }, onSuccess = { navController.popBackStack() })
                     }
@@ -168,12 +158,10 @@ class MainActivity : ComponentActivity() {
                         AddPatientScreen(viewModel = addPatientViewModel, onCancel = { navController.popBackStack() }, onSuccess = { navController.popBackStack() })
                     }
 
-                    // 5. ECRAN REGISTER
                     composable("register") {
                         RegisterScreen(viewModel = registerViewModel, onNavigateBackToLogin = { navController.popBackStack() })
                     }
 
-                    // 6. DASHBOARD DOCTOR
                     composable("doctor_dashboard") {
                         MainDoctorView(
                             onLogout = {

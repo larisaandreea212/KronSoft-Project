@@ -22,7 +22,7 @@ public class QuestionnaireService {
                 .stream()
                 .map(questionnaire -> new QuestionsDTO(
                         questionnaire.getIdQuestion(),
-                        questionnaire.getResponseType(), // enum -> String
+                        questionnaire.getResponseType(),
                         questionnaire.getQuestionText()
                 ))
                 .collect(Collectors.toList());

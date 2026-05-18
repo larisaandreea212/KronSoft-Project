@@ -12,7 +12,6 @@ data class User(
     @SerializedName("firebaseUid")
     val firebaseUid: String,
 
-    // Aceasta este linia care îi lipsește lui Kotlin ca să recunoască 'role'
     @SerializedName("role")
     val role: String
 )

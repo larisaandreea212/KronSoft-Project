@@ -23,7 +23,6 @@ fun DoctorCardComponent(
     isSelected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    // Status color logic: Green for Active, Gray for Inactive
     val statusColor = if (doctor.isActive) Color(0xFF43A047) else Color(0xFF9E9E9E)
 
     Card(
@@ -49,7 +48,6 @@ fun DoctorCardComponent(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Status Dot Indicator
             Box(
                 modifier = Modifier
                     .size(10.dp)
@@ -80,7 +78,6 @@ fun DoctorCardComponent(
                 )
             }
 
-            // Text Status Label (Far Right)
             Text(
                 text = if (doctor.isActive) "ACTIVE" else "INACTIVE",
                 fontSize = 10.sp,

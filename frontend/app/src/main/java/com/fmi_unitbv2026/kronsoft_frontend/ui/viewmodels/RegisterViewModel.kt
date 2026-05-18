@@ -27,13 +27,11 @@ class RegisterViewModel(private val repository: AuthRepository) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Pasul crucial: Repository-ul va verifica dacă email-ul e pre-înregistrat
                 val result = repository.completeRegistration(email.value, password.value)
 
                 if (result) {
                     isSuccess.value = true
                 } else {
-                    // Mesajul tău în engleză
                     errorMessage.value = "Registration impossible. This email is not pre-registered in our system. Please contact the receptionist."
                 }
             } catch (e: Exception) {

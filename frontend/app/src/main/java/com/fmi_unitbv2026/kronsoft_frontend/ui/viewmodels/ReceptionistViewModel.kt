@@ -46,10 +46,8 @@ class ReceptionistViewModel(private val apiService: ApiService) : ViewModel() {
     fun deletePatient(idPatient: String) {
         viewModelScope.launch {
             try {
-                // Convertim String în Int pentru API-ul de Java
                 val response = apiService.deletePatient(idPatient.toInt())
                 if (response.isSuccessful) {
-                    // Refresh local al listei
                     patientsForSelectedDoctor = patientsForSelectedDoctor.filter { it.idPatient != idPatient }
                 }
             } catch (e: Exception) {

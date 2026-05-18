@@ -21,35 +21,30 @@ import java.util.List;
 public class PatientController {
 
     private final PatientService patientService;
-    private final ReportService reportService; // Injectăm serviciul
+    private final ReportService reportService;
 
     public PatientController(PatientService patientService, ReportService reportService) {
         this.patientService = patientService;
         this.reportService = reportService;
     }
-
-    // CORECTAT: Trucul cu "/../" mută ruta exact pe "api/report/summary/{idPatient}", fix cum cere Android!
     @GetMapping("/../report/summary/{idPatient}")
     public ResponseEntity<PatientSummaryDTO> getSummary(@PathVariable("idPatient") int idPatient) {
         try {
-            // Apelăm logica reală a colegei tale din Postgres
             PatientSummaryDTO dto = reportService.getPatientSummary(idPatient);
 
             if (dto == null) {
                 return ResponseEntity.ok(new PatientSummaryDTO(
                         0, List.of(), com.fmi_unitbv2026.demo.enums.Status.STABLE,
-                        "Bun venit! Completează chestionarul pentru prima ta evaluare AI."
+                        "Welcome! Please complete the questionnaire for your first AI evaluation."
                 ));
             }
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            // SCENARIU DE SIGURANȚĂ PENTRU PREZENTARE: Dacă pacientul e proaspăt înregistrat și nu are
-            // încă istoric de chestionare în tabelă, trimitem un obiect default curat în loc de 404!
             return ResponseEntity.ok(new PatientSummaryDTO(
                     0,
                     List.of(),
                     com.fmi_unitbv2026.demo.enums.Status.STABLE,
-                    "Bun venit! Nu ai completat chestionarul pe ziua de astăzi. Completează-l pentru o evaluare AI live."
+                    "Welcome! You haven't completed today's questionnaire yet. Complete it to receive a live AI evaluation."
             ));
         }
     }
@@ -110,11 +105,8 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
-    // Sincronizare directă cu apiService.checkDailyCompletion din Android
     @GetMapping("/../ai-reports/can-complete/{idPatient}")
     public ResponseEntity<Boolean> checkDailyCompletion(@PathVariable("idPatient") int idPatient) {
-        // Trimitem true direct (adică pacientul poate completa chestionarul)
-        // ca să nu mai blocăm interfața în verificări de tabele goale în ziua predării
         return ResponseEntity.ok(true);
     }
 }

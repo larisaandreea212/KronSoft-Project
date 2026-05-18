@@ -15,5 +15,4 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
     Optional<Patient> findByUser_IdUser(Integer idUser);
 
-    //metoda ptr schimbare idDoctor o facem mai bine in service
 }

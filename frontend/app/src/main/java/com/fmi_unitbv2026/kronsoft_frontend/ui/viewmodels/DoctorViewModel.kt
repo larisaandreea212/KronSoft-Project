@@ -62,7 +62,7 @@ class DoctorViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 _errorMessage.value = "Auth Sync Error: ${e.message}"
-                Log.e("ViewModel", "Eroare la legare UID: ${e.stackTraceToString()}")
+                Log.e("ViewModel", "UID error: ${e.stackTraceToString()}")
             } finally {
                 _isLoading.value = false
             }
@@ -88,8 +88,8 @@ class DoctorViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Eroare Dashboard: ${e.message}"
-                Log.e("ViewModel", "Eroare la incarcare: ${e.stackTraceToString()}")
+                _errorMessage.value = "Error Dashboard: ${e.message}"
+                Log.e("ViewModel", "Failed to connect: ${e.stackTraceToString()}")
             } finally {
                 _isLoading.value = false
             }
@@ -142,9 +142,9 @@ class DoctorViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    _errorMessage.value = "Eroare la preluarea datelor pacientului"
+                    _errorMessage.value = "Failed to load patients"
                 }
-                Log.e("API", "Eroare la selectPatient: ${e.message}")
+                Log.e("API", "Error at selectPatient: ${e.message}")
             } finally {
                 withContext(Dispatchers.Main) { _isLoading.value = false }
             }
@@ -161,7 +161,7 @@ class DoctorViewModel : ViewModel() {
                     block()
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
-                        _errorMessage.value = "Eroare: ${e.message}"
+                        _errorMessage.value = "Error: ${e.message}"
                     }
                 } finally {
                     withContext(Dispatchers.Main) {

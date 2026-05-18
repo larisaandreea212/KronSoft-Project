@@ -43,7 +43,7 @@ class PatientViewModel : ViewModel() {
     val patientCard: State<PatientCard?> = _patientCard
 
     fun initializePatientSession(userId: Int) {
-        Log.d("INVESTIGATIE", "!!! VALOAREA LUI USER_ID PRIMITĂ ESTE: $userId !!!")
+        Log.d("Verification", "USER_ID : $userId !!!")
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -68,8 +68,8 @@ class PatientViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                _errorMessage.value = "Eroare conectare: ${e.message}"
-                Log.e("PatientViewModel", "Eroare la incarcare sesiune: ${e.stackTraceToString()}")
+                _errorMessage.value = "Connection error: ${e.message}"
+                Log.e("PatientViewModel", "Failed to load session: ${e.stackTraceToString()}")
             } finally {
                 _isLoading.value = false
             }
@@ -84,7 +84,7 @@ class PatientViewModel : ViewModel() {
                 }
                 _questionsList.value = questions
             } catch (e: Exception) {
-                Log.e("PatientViewModel", "Eroare la loadQuestions: ${e.message}")
+                Log.e("PatientViewModel", "Error at loadQuestions: ${e.message}")
             }
         }
     }
@@ -99,7 +99,7 @@ class PatientViewModel : ViewModel() {
                     _canCompleteToday.value = response.body() ?: false
                 }
             } catch (e: Exception) {
-                Log.e("PatientViewModel", "Eroare la checkDailyCompletion: ${e.message}")
+                Log.e("PatientViewModel", "Error at checkDailyCompletion: ${e.message}")
             }
         }
     }
@@ -112,7 +112,7 @@ class PatientViewModel : ViewModel() {
                 }
                 _patientSummary.value = response
             } catch (e: Exception) {
-                Log.e("PatientViewModel", "Eroare la loadAIEvaluation: ${e.message}")
+                Log.e("PatientViewModel", "Error at loadAIEvaluation: ${e.message}")
             }
         }
     }
@@ -132,7 +132,7 @@ class PatientViewModel : ViewModel() {
                     onResult(false)
                 }
             } catch (e: Exception) {
-                Log.e("PatientViewModel", "Eroare la submitQuestionnaire: ${e.message}")
+                Log.e("PatientViewModel", "Error at submitQuestionnaire: ${e.message}")
                 onResult(false)
             } finally {
                 _isSubmitting.value = false

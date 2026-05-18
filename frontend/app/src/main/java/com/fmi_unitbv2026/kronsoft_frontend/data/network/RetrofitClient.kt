@@ -13,7 +13,6 @@ object RetrofitClient {
             .build()
     }
 
-    // Transformăm funcția în variabilă "lazy" (se creează doar când e nevoie)
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }

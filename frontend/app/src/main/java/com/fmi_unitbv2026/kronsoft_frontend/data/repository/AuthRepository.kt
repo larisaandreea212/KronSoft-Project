@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.tasks.await
 
-// Am adăugat (private val apiService: ApiService) aici
+
 class AuthRepository(private val apiService: ApiService) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -33,19 +33,16 @@ class AuthRepository(private val apiService: ApiService) {
     }
 
     suspend fun completeRegistration(email: String, parola: String): Boolean {
-        // 1. Întrebăm serverul Java
         val isPreRegistered = apiService.checkEmailExists(email)
 
         if (!isPreRegistered) {
             return false
         }
 
-        // 2. Creăm contul în Firebase
         return try {
             val result = auth.createUserWithEmailAndPassword(email, parola).await()
             val uid = result.user?.uid ?: return false
 
-            // 3. Trimitem UID-ul la Java
             apiService.linkFirebaseUid(email, uid)
             true
         } catch (e: Exception) {

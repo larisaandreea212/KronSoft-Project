@@ -26,7 +26,7 @@ import com.fmi_unitbv2026.kronsoft_frontend.data.models.Message
 @Composable
 fun ChatComponent(
     messages: List<Message>,
-    isDoctorView: Boolean = false, // Știe cine privește ecranul
+    isDoctorView: Boolean = false,
     onSendMessage: (String) -> Unit
 ) {
     val deepNavy = Color(0xFF001F3F)
@@ -111,17 +111,9 @@ fun ChatComponent(
 
 @Composable
 fun ChatBubbleVibrant(message: Message, isDoctorView: Boolean, doctorBrush: Brush, patientColor: Color) {
-    // LOGICĂ CURATĂ ȘI INDEPENDENTĂ DE ID-URI:
-    // 1. Stă la dreapta (End) dacă:
-    //    - Sunt pe ecranul doctorului ȘI mesajul e trimis de doctor (isFromDoctor == true)
-    //    - SAU sunt pe ecranul pacientului ȘI mesajul NU e trimis de doctor (isFromDoctor == false)
     val isMyMessage = if (isDoctorView) message.isFromDoctor else !message.isFromDoctor
     val alignment = if (isMyMessage) Alignment.End else Alignment.Start
 
-    // 2. Culoarea bulei: Doctorul este MEREU mov (doctorBrush), Pacientul este MEREU gri (patientColor)
-    // Dacă vrei ca mesajele pacientului să fie și ele mov când se uită pe ecranul lui,
-    // putem pune: brush = if (isMyMessage) doctorBrush else SolidColor(patientColor)
-    // Dar ca să respectăm culorile din baza de date: doctor = mov, pacient = gri:
     val bubbleBrush = if (message.isFromDoctor) doctorBrush else SolidColor(patientColor)
     val textColor = if (message.isFromDoctor) Color.White else Color(0xFF000C18)
 

@@ -36,7 +36,6 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // repository.login returnează acum User? (obiectul complet)
                 val user: User? = repository.login(email.value, password.value)
 
                 if (user != null) {
@@ -44,10 +43,10 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
                     _loggedUserId.value = user.idUser
                     onNavigationRequested(user.role)
                 } else {
-                    _errorMessage.value = "Email sau parolă incorectă."
+                    _errorMessage.value = "Incorect email or password."
                 }
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Eroare necunoscută"
+                _errorMessage.value = e.message ?: "Unknown error"
             } finally {
                 _isLoading.value = false
             }

@@ -15,12 +15,9 @@ class ChatViewModel : ViewModel() {
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages
 
-    // Am lăsat exact cei 3 parametri originali (senderId, receiverId, text) ca să nu mai dea erori în ecrane!
     fun sendMessage(senderId: String, receiverId: String, text: String) {
         if (text.isBlank()) return
 
-        // Logica automată: dacă cel care trimite are ID-ul de doctor (ex: nu e egal cu ID-ul pacientului din sesiune)
-        // O metodă simplă: dacă receiverId este "1" (doctorul implicit), înseamnă că senderId este PACIENTUL (deci isFromDoctor = false)
         val isDoctor = (receiverId != "1")
 
         val message = Message(

@@ -33,7 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun MainDoctorView(
     viewModel: DoctorViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    onLogout: () -> Unit // 1. Adăugat parametrul onLogout cerut de navigație
+    onLogout: () -> Unit
 ) {
     val doctorInfo by viewModel.doctorInfo
     val patientsList by viewModel.patientsList
@@ -68,7 +68,6 @@ fun MainDoctorView(
         }
     }
 
-    // 2. Logică Chat - se declanșează când se schimbă pacientul sau când doctorInfo e gata
     LaunchedEffect(selectedPatientId, doctorInfo) {
         if (selectedPatientId != null && doctorInfo != null) {
             chatViewModel.clearMessages()
@@ -92,7 +91,7 @@ fun MainDoctorView(
                         viewModel.loadDoctorDashboard(doctor.idDoctor.toInt())
                     }
                 },
-                onLogout = { // 2. Legat acțiunea de logout din sidebar
+                onLogout = {
                     FirebaseAuth.getInstance().signOut()
                     chatViewModel.clearMessages()
                     onLogout()
@@ -145,7 +144,7 @@ fun MainDoctorView(
                         patientsList
                     }
 
-                    items(filteredList) { patient -> // corectat micul typo din codul inițial pentru filtrare
+                    items(filteredList) { patient ->
                         PatientCardComponent(
                             patient = patient,
                             isSelected = selectedPatientId == patient.idPatient,
@@ -222,8 +221,6 @@ fun MainDoctorView(
                                 color = Color(0xFF001F3F)
                             )
 
-                            // ACTUALIZAT: Apelăm denumirea corectă ChatComponent și activăm isDoctorView
-                            // În MainDoctorView.kt, modifică doar bucata asta din ChatComponent:
                             ChatComponent(
                                 messages = messages,
                                 isDoctorView = true,
@@ -268,7 +265,7 @@ fun DoctorSidebar(
     doctor: Doctor,
     selectedTab: String,
     onTabSelected: (String) -> Unit,
-    onLogout: () -> Unit // 3. Adăugat parametrul și în constructorul de Sidebar
+    onLogout: () -> Unit
 ) {
     val deepNavy = Color(0xFF000814)
     val royalBlue = Color(0xFF001F3F)
@@ -302,11 +299,11 @@ fun DoctorSidebar(
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "Sign Out",
-            color = Color.White.copy(alpha = 0.5f), // Crescut opacitatea de la 0.3f ca să se vadă mai bine textul
+            color = Color.White.copy(alpha = 0.5f),
             fontSize = 13.sp,
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .clickable { onLogout() } // 4. Activat click-ul spre funcția de deconectare
+                .clickable { onLogout() }
         )
     }
 }
@@ -334,5 +331,5 @@ fun SidebarNavItem(label: String, isSelected: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true, widthDp = 1400, heightDp = 900)
 @Composable
 fun MainDoctorViewPreview() {
-    MainDoctorView(onLogout = {}) // Adăugat lambda gol în preview ca să nu dea eroare de compilare
+    MainDoctorView(onLogout = {})
 }
